@@ -1,0 +1,1164 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ffe3ee"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Fisioterapia">
+<title>FISIOTERAPIA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+/* Layout: app de una columna con barra de pestañas abajo; pasteles rosados con acentos lila (Gastro Quirúrgica), menta, durazno y cielo */
+:root{
+  --bg:#fff6f9; --surface:#ffffff; --ink:#3b2433; --muted:#8a6b7d; --line:#f4dce6;
+  --accent:#d6457f; --accent-ink:#ffffff; --accent-soft:#ffe3ee;
+  --gastro:#7657d4; --gastro-soft:#ede7ff;
+  --mint:#dcf5e8; --mint-ink:#23744f; --peach:#ffe7d6; --peach-ink:#a9531f; --sky:#e1eeff; --sky-ink:#33609f;
+  --ok:#23744f; --warn:#b5730f; --bad:#c3304b;
+  --shadow:0 8px 24px rgba(214,69,127,.10);
+  --display:"Fredoka",ui-rounded,ui-sans-serif,system-ui,sans-serif;
+  --body:"Nunito",ui-sans-serif,system-ui,sans-serif;
+  --r:20px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#1d1219; --surface:#2a1b25; --ink:#f9eaf2; --muted:#c7a5b8; --line:#40293a;
+  --accent:#ff8cba; --accent-ink:#2b0f1d; --accent-soft:#4a2339;
+  --gastro:#bba5ff; --gastro-soft:#30264a;
+  --mint:#1e3a2e; --mint-ink:#93e3bb; --peach:#47291b; --peach-ink:#ffb98c; --sky:#1f2c43; --sky-ink:#a3c6ff;
+  --ok:#86dcae; --warn:#f2c262; --bad:#ff8fa1; --shadow:0 8px 24px rgba(0,0,0,.28); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#1d1219; --surface:#2a1b25; --ink:#f9eaf2; --muted:#c7a5b8; --line:#40293a;
+  --accent:#ff8cba; --accent-ink:#2b0f1d; --accent-soft:#4a2339;
+  --gastro:#bba5ff; --gastro-soft:#30264a;
+  --mint:#1e3a2e; --mint-ink:#93e3bb; --peach:#47291b; --peach-ink:#ffb98c; --sky:#1f2c43; --sky-ink:#a3c6ff;
+  --ok:#86dcae; --warn:#f2c262; --bad:#ff8fa1; --shadow:0 8px 24px rgba(0,0,0,.28); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;margin:0}
+.wrap{max-width:760px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 112px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;font-weight:600}
+h1{font-size:1.75rem;line-height:1.1} h2{font-size:1.2rem} h3{font-size:1.02rem}
+.eyebrow{font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:800}
+.muted{color:var(--muted)} .small{font-size:.86rem}
+.stack{display:flex;flex-direction:column;gap:14px} .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+.brand{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-weight:700;letter-spacing:.12em;font-size:1rem;color:var(--accent);display:flex;align-items:center;gap:8px}
+.logo i{width:26px;height:26px;border-radius:9px;background:var(--accent);display:inline-grid;place-items:center;color:var(--accent-ink);font-style:normal;font-size:.9rem;letter-spacing:0}
+.who{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+.who button{border:0;background:transparent;min-height:32px;padding:4px 10px;font-size:.82rem}
+.who button.on{background:var(--accent-soft);color:var(--accent)}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow)}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.item{display:flex;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);min-width:0}
+.item:first-child{border-top:0}
+.item .grow{flex:1;min-width:0}
+.item .name{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tap{cursor:pointer;transition:background .15s}
+.tap:hover{background:var(--accent-soft)}
+.clock{font-family:var(--display);font-weight:600;font-variant-numeric:tabular-nums;min-width:56px;line-height:1.15}
+button,.btn{font:inherit;font-weight:800;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 15px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;transition:transform .12s, background .15s}
+button.primary,.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 6px 16px rgba(214,69,127,.25)}
+button.lila{background:var(--gastro);color:#fff;border-color:var(--gastro)}
+button.ghost{border-color:transparent;background:transparent;padding:8px 10px;box-shadow:none}
+button.danger{color:var(--bad)}
+button:disabled{opacity:.5;cursor:default}
+@media (prefers-reduced-motion:no-preference){button:active,.btn:active{transform:scale(.96)}}
+button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wa{background:#25a35a;color:#fff;border-color:#25a35a}
+.pill{display:inline-flex;align-items:center;gap:4px;font-size:.74rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.pill.gastro{background:var(--gastro-soft);color:var(--gastro)}
+.pill.mint{background:var(--mint);color:var(--mint-ink)}
+.pill.peach{background:var(--peach);color:var(--peach-ink)}
+.pill.sky{background:var(--sky);color:var(--sky-ink)}
+.pill.done{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.pill.bad{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+.av{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;font-family:var(--display);font-weight:600;flex:none;background:var(--accent-soft);color:var(--accent)}
+.av.gastro{background:var(--gastro-soft);color:var(--gastro)}
+.av.daniel{background:var(--sky);color:var(--sky-ink)}
+.av.sm{width:30px;height:30px;border-radius:10px;font-size:.8rem}
+label{display:block;font-weight:800;font-size:.9rem;margin-bottom:5px}
+input,select,textarea{font:inherit;width:100%;padding:11px 13px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink)}
+textarea{min-height:80px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.grid2{grid-template-columns:1fr}}
+.seg{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px;box-shadow:var(--shadow)}
+.seg button{flex:1;border:0;background:transparent;min-height:38px;justify-content:center}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.seg button.on.g{background:var(--gastro);color:#fff}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days button{min-width:44px;justify-content:center;padding:6px 8px}
+.days button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.eva{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.eva button{padding:0;justify-content:center;border-radius:10px;min-height:42px;font-variant-numeric:tabular-nums}
+.eva button.on{color:#fff;border-color:transparent}
+.eva-legend{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-top:3px}
+.scale5{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.scale5 button{justify-content:center;border-radius:10px;padding:0}
+.scale5 button.on,.opts button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+/* Hero */
+.hero{border-radius:26px;padding:20px 18px;position:relative;overflow:hidden;background:
+  radial-gradient(circle at 92% 8%, var(--gastro-soft) 0 64px, transparent 65px),
+  radial-gradient(circle at 78% 120%, var(--peach) 0 80px, transparent 81px),
+  radial-gradient(circle at 4% 0%, var(--surface) 0 40px, transparent 41px), var(--accent-soft)}
+.hero h1{max-width:80%}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:560px){.tiles{grid-template-columns:1fr 1fr}}
+.tile{border-radius:18px;padding:12px 14px;min-width:0}
+.tile b{display:block;font-family:var(--display);font-weight:600;font-size:1.45rem;font-variant-numeric:tabular-nums;line-height:1.2;overflow-wrap:anywhere}
+.tile span{font-size:.8rem;font-weight:700}
+.t1{background:var(--accent-soft);color:var(--accent)} .t2{background:var(--gastro-soft);color:var(--gastro)} .t3{background:var(--mint);color:var(--mint-ink)} .t4{background:var(--peach);color:var(--peach-ink)}
+/* Pre / Post */
+.steps{display:flex;align-items:center;gap:0;margin-top:8px}
+.step{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;min-width:0;text-align:center}
+.step .dot{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.8rem;border:2px dashed var(--line);color:var(--muted);background:var(--surface)}
+.step.done .dot{background:var(--mint);border:2px solid var(--mint-ink);color:var(--mint-ink)}
+.step.sched .dot{border:2px solid var(--gastro);color:var(--gastro)}
+.step small{font-size:.72rem;color:var(--muted);line-height:1.2}
+.bar{flex:1;height:3px;background:var(--line);border-radius:3px;margin-bottom:22px}
+.bar.on{background:var(--mint-ink)}
+.toggle{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:.85rem;cursor:pointer;border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:var(--surface);min-height:36px}
+.toggle.on{background:var(--mint);color:var(--mint-ink);border-color:transparent}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);z-index:5}
+nav.tabs .in{display:flex;max-width:760px;width:100%;padding:6px 6px}
+nav.tabs button{flex:1;border:0;border-radius:16px;background:transparent;flex-direction:column;gap:2px;font-size:.72rem;padding:6px 2px;min-height:54px;color:var(--muted);box-shadow:none}
+nav.tabs button.on{color:var(--accent);background:var(--accent-soft)}
+nav.tabs svg{width:22px;height:22px}
+.sheet{position:fixed;inset:0;background:var(--bg);z-index:20;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sheet-head{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:2;padding-top:env(safe-area-inset-top,0px)}
+.sheet-head .in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
+.sheet-head h2{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .dow{text-align:center;font-size:.72rem;color:var(--muted);font-weight:800}
+.cal button{flex-direction:column;justify-content:flex-start;align-items:stretch;padding:4px 2px;border-radius:12px;min-height:78px;gap:2px;font-variant-numeric:tabular-nums;box-shadow:none;min-width:0;overflow:hidden;font-size:.85rem}
+.cal button .dn{text-align:center}
+.ev{display:block;font-size:.6rem;line-height:1.3;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:5px;padding:1px 3px;background:var(--accent-soft);color:var(--accent);text-align:left}
+.ev.g{background:var(--gastro-soft);color:var(--gastro)}
+.ev.h{opacity:.55;text-decoration:line-through}
+.ev.more{background:transparent;color:inherit;text-align:center}
+.cal button.sel .ev{background:rgba(255,255,255,.85);color:#3b2433}
+@media (min-width:600px){.ev{font-size:.7rem}.cal button{min-height:92px}}
+.qrbox{background:#fff;border-radius:20px;padding:16px;display:grid;place-items:center;width:max-content;max-width:100%;margin:0 auto;box-shadow:var(--shadow)}
+.qrbox img,.qrbox canvas{display:block;max-width:100%;height:auto}
+.cal button.other{opacity:.35}
+.cal button.today{border:2px solid var(--accent)}
+.cal button.sel{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.dots i.g{background:var(--gastro)}
+.cal button.sel .dots i{background:var(--accent-ink)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:16px;z-index:50;max-width:calc(100% - 32px);font-weight:800}
+.qrow{border-top:1px dashed var(--line);padding-top:12px}
+.qrow:first-child{border-top:0;padding-top:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:.85rem;padding:6px 11px;border-radius:999px;border:1.5px dashed var(--accent);color:var(--accent);background:transparent;min-height:34px;box-shadow:none}
+.notice{border:1.5px solid var(--warn);border-radius:var(--r);padding:12px;background:var(--surface)}
+.empty{padding:24px 14px;text-align:center;color:var(--muted)}
+details summary{cursor:pointer;font-weight:800}
+.doc{background:#fff;color:#3b2433;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)}
+.ring{flex:none}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .2s ease-out}@keyframes up{from{transform:translateY(14px);opacity:.6}to{transform:none;opacity:1}}}
+</style>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+</head><body>
+
+<script>
+// Versión independiente: guarda todo en este celular (sin cuenta de Claude)
+(function(){
+ const K='fisio_diana_db_v1', SEED={"preguntas": {"s05": {"activa": true, "fase": "sesion", "id": "s05", "opciones": "Buena, Regular, Mala", "orden": 5, "para": "todos", "patologia": "", "texto": "Tolerancia a la sesión", "tipo": "opciones", "usos": 0}, "g01": {"activa": true, "fase": "sesion", "id": "g01", "opciones": "Costal, Diafragmático, Mixto, Superficial", "orden": 1, "para": "gastro", "patologia": "", "texto": "Patrón respiratorio", "tipo": "opciones", "usos": 0}, "s03": {"activa": true, "fase": "sesion", "id": "s03", "opciones": "", "orden": 3, "para": "todos", "patologia": "", "texto": "Qué se hizo (técnicas y agentes)", "tipo": "larga", "usos": 0}, "v02": {"activa": true, "fase": "valoracion", "id": "v02", "opciones": "", "orden": 2, "para": "todos", "patologia": "", "texto": "Inicio y mecanismo de la lesión o síntoma", "tipo": "larga", "usos": 0}, "v01": {"activa": true, "fase": "valoracion", "id": "v01", "opciones": "", "orden": 1, "para": "todos", "patologia": "", "texto": "Motivo de consulta", "tipo": "larga", "usos": 0}, "v08": {"activa": true, "fase": "valoracion", "id": "v08", "opciones": "", "orden": 8, "para": "todos", "patologia": "", "texto": "Pruebas especiales y hallazgos", "tipo": "larga", "usos": 0}, "g02": {"activa": true, "fase": "sesion", "id": "g02", "opciones": "", "orden": 2, "para": "gastro", "patologia": "", "texto": "Saturación de oxígeno (%)", "tipo": "numero", "usos": 0}, "v05": {"activa": true, "fase": "valoracion", "id": "v05", "opciones": "", "orden": 5, "para": "todos", "patologia": "", "texto": "Localización y tipo de dolor", "tipo": "texto", "usos": 0}, "s04": {"activa": true, "fase": "sesion", "id": "s04", "opciones": "", "orden": 4, "para": "todos", "patologia": "", "texto": "Ejercicios y plan casero", "tipo": "larga", "usos": 0}, "g04": {"activa": true, "fase": "sesion", "id": "g04", "opciones": "Sedestación, Bipedestación, Marcha asistida, Marcha independiente", "orden": 4, "para": "gastro", "patologia": "", "texto": "Tolerancia a la actividad", "tipo": "opciones", "usos": 0}, "s06": {"activa": true, "fase": "sesion", "id": "s06", "opciones": "Mucho mejor, Algo mejor, Igual, Peor", "orden": 6, "para": "todos", "patologia": "", "texto": "Cómo se siente el paciente frente a la sesión anterior", "tipo": "opciones", "usos": 0}, "v11": {"activa": true, "fase": "valoracion", "id": "v11", "opciones": "", "orden": 11, "para": "todos", "patologia": "", "texto": "Plan de tratamiento", "tipo": "larga", "usos": 0}, "v03": {"activa": true, "fase": "valoracion", "id": "v03", "opciones": "", "orden": 3, "para": "todos", "patologia": "", "texto": "Antecedentes médicos, quirúrgicos y medicamentos", "tipo": "larga", "usos": 0}, "g03": {"activa": true, "fase": "sesion", "id": "g03", "opciones": "Independiente, Requiere supervisión, Requiere ayuda, Dependiente", "orden": 3, "para": "gastro", "patologia": "", "texto": "Movilidad e independencia", "tipo": "opciones", "usos": 0}, "s07": {"activa": true, "fase": "sesion", "id": "s07", "opciones": "", "orden": 7, "para": "todos", "patologia": "", "texto": "Observaciones", "tipo": "texto", "usos": 0}, "v10": {"activa": true, "fase": "valoracion", "id": "v10", "opciones": "", "orden": 10, "para": "todos", "patologia": "", "texto": "Objetivo del paciente", "tipo": "texto", "usos": 0}, "v09": {"activa": true, "fase": "valoracion", "id": "v09", "opciones": "", "orden": 9, "para": "todos", "patologia": "", "texto": "Actividades de la vida diaria limitadas", "tipo": "texto", "usos": 0}, "g05": {"activa": true, "fase": "sesion", "id": "g05", "opciones": "", "orden": 5, "para": "gastro", "patologia": "", "texto": "Educación y ejercicios entregados (incentivo respiratorio, movilidad temprana)", "tipo": "larga", "usos": 0}}, "medidas": {"sts": {"detalle": "", "ejemplo": "", "id": "sts", "max": "", "mejor": "bajo", "min": "", "nombre": "Sentarse y pararse 5 veces", "tipo": "numero", "unidad": "s", "usos": 0}, "ashworth": {"detalle": "Músculo", "ejemplo": "Flexores de codo der.", "id": "ashworth", "max": "4", "mejor": "bajo", "min": "0", "nombre": "Espasticidad (Ashworth modificada)", "tipo": "numero", "unidad": "", "usos": 0}, "lefs": {"detalle": "", "ejemplo": "", "id": "lefs", "max": "80", "mejor": "alto", "min": "0", "nombre": "Funcionalidad miembro inferior (LEFS)", "tipo": "numero", "unidad": "pts", "usos": 0}, "berg": {"detalle": "", "ejemplo": "", "id": "berg", "max": "56", "mejor": "alto", "min": "0", "nombre": "Equilibrio (Berg)", "tipo": "numero", "unidad": "pts", "usos": 0}, "rom": {"detalle": "Articulación, movimiento y lado", "ejemplo": "Flexión rodilla der.", "id": "rom", "max": "180", "mejor": "alto", "min": "0", "nombre": "Rango de movimiento", "tipo": "numero", "unidad": "°", "usos": 0}, "odi": {"detalle": "", "ejemplo": "", "id": "odi", "max": "100", "mejor": "bajo", "min": "0", "nombre": "Discapacidad lumbar (Oswestry)", "tipo": "numero", "unidad": "%", "usos": 0}, "fuerza": {"detalle": "Músculo o grupo muscular", "ejemplo": "Cuádriceps izq.", "id": "fuerza", "max": "5", "mejor": "alto", "min": "0", "nombre": "Fuerza muscular (Daniels)", "tipo": "daniels", "unidad": "", "usos": 0}, "dolor": {"detalle": "", "ejemplo": "", "id": "dolor", "max": "10", "mejor": "bajo", "min": "0", "nombre": "Dolor (EVA)", "tipo": "eva", "unidad": "", "usos": 0}, "barthel": {"detalle": "", "ejemplo": "", "id": "barthel", "max": "100", "mejor": "alto", "min": "0", "nombre": "Independencia AVD (Barthel)", "tipo": "numero", "unidad": "pts", "usos": 0}, "6mw": {"detalle": "", "ejemplo": "", "id": "6mw", "max": "", "mejor": "alto", "min": "", "nombre": "Caminata de 6 minutos", "tipo": "numero", "unidad": "m", "usos": 0}, "perimetro": {"detalle": "Zona y lado", "ejemplo": "Rodilla der. a nivel de rótula", "id": "perimetro", "max": "", "mejor": "bajo", "min": "", "nombre": "Perímetro / edema", "tipo": "numero", "unidad": "cm", "usos": 0}, "lawton": {"detalle": "", "ejemplo": "", "id": "lawton", "max": "8", "mejor": "alto", "min": "0", "nombre": "AVD instrumentales (Lawton y Brody)", "tipo": "numero", "unidad": "pts", "usos": 0}, "dash": {"detalle": "", "ejemplo": "", "id": "dash", "max": "100", "mejor": "bajo", "min": "0", "nombre": "Funcionalidad miembro superior (QuickDASH)", "tipo": "numero", "unidad": "pts", "usos": 0}, "tug": {"detalle": "", "ejemplo": "", "id": "tug", "max": "", "mejor": "bajo", "min": "", "nombre": "Timed Up and Go", "tipo": "numero", "unidad": "s", "usos": 0}}, "config": {"main": {"correo": "", "costo": 60000, "costoGastro": 55000, "formUrl": "https://claude.ai/artifact/ADdnoJdj89VcvUchXLAPXB", "id": "main", "profesionales": {"daniel": {"correo": "", "instagram": "", "nombre": "Daniel Villamizar", "titulo": "", "tp": "", "whatsapp": ""}, "diana": {"correo": "", "instagram": "ft_dianaurbina", "nombre": "Diana Alejandra Carrillo Urbina", "titulo": "Fisioterapeuta · Mg. Rehabilitación Deportiva", "tp": "1090500693", "whatsapp": "3507016723"}}, "telefono": "3507016723"}}};
+ let data=null;try{data=JSON.parse(localStorage.getItem(K))}catch(e){}
+ if(!data){data=JSON.parse(JSON.stringify(SEED));try{localStorage.setItem(K,JSON.stringify(data))}catch(e){}}
+ const subs={};
+ const persist=()=>{try{localStorage.setItem(K,JSON.stringify(data));localStorage.setItem(K+'_t',new Date().toISOString())}catch(e){console.error(e)}};
+ const snap=col=>({docs:Object.entries(data[col]||{}).map(([id,v])=>({id,exists:true,data:()=>v}))});
+ const emit=col=>(subs[col]||[]).forEach(f=>{try{f(snap(col))}catch(e){console.error(e)}});
+ const clone=v=>JSON.parse(JSON.stringify(v));
+ const db={collection:col=>({onSnapshot(cb){(subs[col]=subs[col]||[]).push(cb);setTimeout(()=>cb(snap(col)),0);return()=>{}},
+  doc:id=>({async set(v){(data[col]=data[col]||{})[id]=clone(v);persist();emit(col)},
+   async update(v){data[col]=data[col]||{};data[col][id]=Object.assign({},data[col][id]||{},clone(v));persist();emit(col)},
+   async delete(){if(data[col])delete data[col][id];persist();emit(col)}})})};
+ window.__fisio={get:()=>data,set:v=>{data=v;persist();Object.keys(subs).forEach(emit)}};
+ const downloads={async save({filename,data:b,type}){const blob=b instanceof Blob?b:new Blob([b],{type:type||'application/octet-stream'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);return {saved:true}}};
+ window.claude={use:async n=>n==='db'?db:n==='downloads'?downloads:null};
+ try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+})();
+</script>
+<div class="wrap" id="main"></div>
+<nav class="tabs" aria-label="Secciones"><div class="in" id="tabs"></div></nav>
+<div id="sheetRoot"></div>
+
+<script>
+// ===================== Estado =====================
+const S={pacientes:{},citas:{},sesiones:{},preguntas:{},config:{},medidas:{},prospectos:{},tab:'hoy',tipo:'particular',q:'',calMonth:null,calSel:null,ready:false,yo:'todos',gFiltro:'todos'};
+S.yo='todos';
+let db=null, mcp=null, sample=null, downloads=null;
+const DOW=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const MES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const today=()=>ymd(new Date());
+const addDays=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return ymd(d)};
+const fmtFecha=s=>{if(!s)return '';const d=parse(s);return DOW[d.getDay()]+' '+d.getDate()+' de '+MES[d.getMonth()]};
+const fmtCorto=s=>{if(!s)return '';const d=parse(s);return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear()};
+const fmtHora=h=>{if(!h)return '';let [H,M]=h.split(':').map(Number);const ap=H>=12?'p. m.':'a. m.';H=H%12||12;return H+':'+pad(M)+' '+ap};
+const money=n=>'$'+Number(n||0).toLocaleString('es-CO');
+const iniciales=n=>(n||'?').split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+function toast(msg,ms=2600){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),ms)}
+const list=o=>Object.values(o);
+const PRO_DEF={
+  diana:{nombre:'Diana Alejandra Carrillo Urbina',titulo:'Fisioterapeuta · Mg. Rehabilitación Deportiva',tp:'1090500693',whatsapp:'3507016723',instagram:'ft_dianaurbina',correo:''},
+  daniel:{nombre:'Daniel Villamizar',titulo:'',tp:'',whatsapp:'',instagram:'',correo:''}
+};
+function cfg(){const m=S.config.main||{};return Object.assign({costo:55000,costoGastro:55000,correo:'',telefono:''},m,{profesionales:{diana:Object.assign({},PRO_DEF.diana,m.profesionales?.diana),daniel:Object.assign({},PRO_DEF.daniel,m.profesionales?.daniel)}})}
+const pro=k=>cfg().profesionales[k]||cfg().profesionales.diana;
+const proDe=p=>p.tipo==='gastro'?'diana':(p.profesional||'diana');
+const visible=p=>S.yo==='todos'||proDe(p)===S.yo;
+const MOD={domicilio:'Domicilio',presencial:'Presencial',virtual:'Virtual'};
+const ETAPA={pre:'Pre‑quirúrgica',post:'Post‑quirúrgica'};
+
+// ===================== Datos =====================
+const COLS=['pacientes','citas','sesiones','preguntas','config','medidas','prospectos'];
+async function save(col,id,data){
+  S[col][id]=Object.assign({},data,{id});
+  if(!db){toast('Sin conexión a la base de datos: el cambio no se guardó');return}
+  try{await db.collection(col).doc(id).set(Object.assign({},data,{id}))}catch(e){toast('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.')}
+}
+async function patch(col,id,data){
+  S[col][id]=Object.assign({},S[col][id]||{},data);
+  if(!db)return;
+  try{await db.collection(col).doc(id).update(data)}catch(e){toast('No se pudo guardar el cambio.')}
+}
+async function remove(col,id){delete S[col][id];if(db){try{await db.collection(col).doc(id).delete()}catch(e){}}}
+
+async function boot(){
+  render();
+  const c=window.claude;
+  if(!c||!c.use){S.ready=true;render();return}
+  const timer=setTimeout(()=>{if(!S.ready){S.ready=true;render()}},10000);
+  db=await c.use('db');
+  if(!db){clearTimeout(timer);S.ready=true;render();return}
+  let pending=COLS.length;
+  COLS.forEach(col=>{
+    let first=true;
+    db.collection(col).onSnapshot(snap=>{
+      const o={};snap.docs.forEach(d=>{o[d.id]=Object.assign({},d.data(),{id:d.id})});S[col]=o;
+      if(first){first=false;pending--;if(pending<=0){clearTimeout(timer);S.ready=true}}
+      render();
+    },()=>{if(first){first=false;pending--;if(pending<=0){clearTimeout(timer);S.ready=true;render()}}});
+  });
+  c.use('mcp').then(x=>mcp=x);
+  c.use('sample').then(x=>{sample=x;render()});
+  c.use('downloads').then(x=>downloads=x);
+}
+
+// ===================== Consultas =====================
+const pacientesDe=t=>list(S.pacientes).filter(p=>p.tipo===t&&visible(p)).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+const citasDe=pid=>list(S.citas).filter(c=>c.pacienteId===pid).sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+const sesionesDe=pid=>list(S.sesiones).filter(s=>s.pacienteId===pid).sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+const citasDia=f=>list(S.citas).filter(c=>c.fecha===f&&c.estado!=='cancelada'&&S.pacientes[c.pacienteId]&&visible(S.pacientes[c.pacienteId])).sort((a,b)=>(a.hora||'').localeCompare(b.hora||''));
+const hechas=pid=>citasDe(pid).filter(c=>c.estado==='hecha').length;
+const etapaCita=(pid,e)=>citasDe(pid).filter(c=>c.etapa===e&&c.estado!=='cancelada').slice(-1)[0];
+function estadoGastro(p){
+  const pre=etapaCita(p.id,'pre'), post=etapaCita(p.id,'post');
+  if(post?.estado==='hecha'&&pre?.estado==='hecha')return {k:'completo',txt:'Completo',cls:'mint',pre,post};
+  if(pre?.estado==='hecha'&&post)return {k:'post',txt:'Post agendado',cls:'gastro',pre,post};
+  if(pre?.estado==='hecha')return {k:'porpost',txt:'Viene post · por agendar',cls:'peach',pre,post};
+  if(pre)return {k:'pre',txt:'Pre agendado',cls:'sky',pre,post};
+  return {k:'nada',txt:'Sin agendar',cls:'done',pre,post};
+}
+const preHecho=p=>estadoGastro(p).pre?.estado==='hecha';
+function precioCita(c){const p=S.pacientes[c.pacienteId];if(!p)return '';
+  if(p.tipo==='gastro')return c.etapa==='post'?'Incluido':money(cfg().costoGastro)+' por paciente';
+  return money(p.costo||cfg().costo)}
+const valorCita=c=>{const p=S.pacientes[c.pacienteId];if(!p||c.estado==='cancelada')return 0;return p.tipo==='gastro'?(c.etapa==='post'?0:+cfg().costoGastro||0):(+p.costo||+cfg().costo||0)};
+const horaCorta=h=>{if(!h)return '';let [H,M]=h.split(':').map(Number);const ap=H>=12?'p':'a';H=H%12||12;return H+(M?':'+pad(M):'')+ap};
+function preguntasPara(fase,p){
+  const pat=(p?.patologia||'').toLowerCase();
+  return list(S.preguntas).filter(q=>q.fase===fase&&q.activa!==false&&(!q.para||q.para==='todos'||q.para===p?.tipo)&&(!q.patologia||pat.includes(q.patologia.toLowerCase())))
+    .sort((a,b)=>(a.orden??99)-(b.orden??99)||(b.usos||0)-(a.usos||0));
+}
+function aprendidas(qid){
+  const m=new Map();
+  list(S.sesiones).concat(list(S.pacientes).map(p=>({respuestas:p.valoracion||{}}))).forEach(s=>{const v=(s.respuestas||{})[qid];if(typeof v==='string'&&v.trim()&&v.length<140)m.set(v.trim(),(m.get(v.trim())||0)+1)});
+  return [...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,25).map(x=>x[0]);
+}
+const waNum=t=>{let d=String(t||'').replace(/\D/g,'');if(d.length===10)d='57'+d;return d};
+const waLink=(t,msg)=>'https://wa.me/'+waNum(t)+(msg?'?text='+encodeURIComponent(msg):'');
+const igLink=h=>'https://instagram.com/'+String(h||'').replace(/^@/,'');
+function etiquetaCita(c){const p=S.pacientes[c.pacienteId];
+  if(p.tipo==='gastro')return ETAPA[c.etapa]||'Sesión';
+  const n=citasDe(p.id).findIndex(x=>x.id===c.id)+1;return `Sesión ${n} de ${p.sesionesTotales||citasDe(p.id).length}`}
+function msgPaciente(c){const p=S.pacientes[c.pacienteId];const pr=pro(proDe(p));
+  return `Hola ${p.nombre.split(' ')[0]}, te recuerdo tu ${p.tipo==='gastro'?'sesión '+(c.etapa==='post'?'post‑quirúrgica':'pre‑quirúrgica'):'sesión de fisioterapia'} el ${fmtFecha(c.fecha)} a las ${fmtHora(c.hora)}${c.modalidad?' ('+MOD[c.modalidad].toLowerCase()+')':''}. Por favor confirma tu asistencia. ${pr.nombre}, ${pr.titulo}.`}
+function msgMio(f){const cs=citasDia(f);return `Agenda FISIOTERAPIA ${fmtFecha(f)}:\n`+(cs.length?cs.map(c=>{const p=S.pacientes[c.pacienteId];return `• ${fmtHora(c.hora)} – ${p.nombre} · ${p.tipo==='gastro'?'Gastro Quirúrgica '+(c.etapa||''):'Particular'}${c.modalidad?' · '+MOD[c.modalidad]:''}`}).join('\n'):'Sin citas.')}
+
+// ===================== Íconos =====================
+const I={
+ hoy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+ pacientes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.8c2 .7 3.2 2.4 3.6 5.2"/></svg>',
+ agenda:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/></svg>',
+ preguntas:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M9.5 9a2.5 2.5 0 1 1 3.3 2.4c-.5.2-.8.6-.8 1.1M12 14.2v.1"/></svg>',
+ ajustes:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>'
+};
+I.captar='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>';
+const TABS=[['hoy','Hoy'],['pacientes','Pacientes'],['agenda','Agenda'],['captar','QR'],['preguntas','Preguntas'],['ajustes','Ajustes']];
+const PEST={nuevo:'Nuevo',contactado:'Contactado',agendado:'Agendado',descartado:'Descartado'};
+const PRIO={alta:['Muy interesado','mint'],media:['Interesado','peach'],baja:['Solo pregunta','done']};
+function vCaptar(){
+  const c=cfg(), url=c.formUrl||'';
+  const ps=list(S.prospectos).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+  const nuevos=ps.filter(p=>p.estado==='nuevo');
+  return `<div class="stack"><div class="top"><div><div class="eyebrow">Pacientes nuevos</div><h1>QR de captación</h1></div></div>
+   <div class="card stack" style="align-items:center;text-align:center">
+    <p class="small muted" style="margin:0;max-width:44ch">Quien escanee este código llena unas preguntas cortas. La página le dice si es un buen candidato y envía sus datos por WhatsApp a ${esc(pro('diana').nombre.split(' ')[0])}.</p>
+    ${url?`<div class="qrbox" id="qr" aria-label="Código QR del formulario"></div>
+    <div class="small muted" style="overflow-wrap:anywhere;user-select:all">${esc(url)}</div>
+    <div class="row" style="justify-content:center"><button class="primary" data-act="copiarLink">Copiar enlace</button><a class="btn wa" href="https://wa.me/?text=${encodeURIComponent('Agenda tu valoración de fisioterapia aquí: '+url)}" target="_blank" rel="noopener">Compartir por WhatsApp</a><button data-act="bajarQR">Descargar QR</button></div>`
+    :`<div class="empty">Aún no hay formulario enlazado.</div>`}</div>
+   <div class="row between"><h2>Prospectos ${nuevos.length?`<span class="pill">${nuevos.length} nuevos</span>`:''}</h2><div class="row"><button data-act="prosExcel" data-modo="bajar">Excel</button><button data-act="prosExcel" data-modo="correo">Compartir Excel</button></div></div>
+   <details class="card" ${ps.length?'':'open'}><summary>Registrar un prospecto</summary><div class="stack" style="margin-top:10px">
+    <div><label for="prPegar">Pega aquí el mensaje que llegó por WhatsApp</label><textarea id="prPegar" placeholder="Se llenan solos el nombre, el WhatsApp, el motivo y el interés"></textarea></div>
+    <div class="grid2"><div><label for="prNom">Nombre</label><input id="prNom"></div><div><label for="prWa">WhatsApp</label><input id="prWa" inputmode="tel"></div></div>
+    <div class="grid2"><div><label for="prMot">Motivo</label><input id="prMot"></div><div><label for="prPri">Interés</label><select id="prPri">${Object.entries(PRIO).map(([k,[l]])=>`<option value="${k}">${l}</option>`).join('')}</select></div></div>
+    <div class="row"><button class="primary" data-act="addPros">Guardar prospecto</button></div></div></details>
+   <div class="list">${ps.length?ps.map(p=>`<div class="item" style="flex-wrap:wrap"><div class="av peach" style="background:var(--peach);color:var(--peach-ink)">${esc(iniciales(p.nombre))}</div>
+     <div class="grow" style="min-width:160px"><div class="name">${esc(p.nombre)}</div><div class="small muted">${esc(p.motivo||'—')} · ${fmtCorto(p.fecha)}</div>
+     <div class="row" style="gap:6px;margin-top:4px"><span class="pill ${PRIO[p.prioridad]?.[1]||'done'}">${PRIO[p.prioridad]?.[0]||'—'}</span>
+     <select aria-label="Estado" data-pest="${p.id}" style="width:auto;padding:4px 8px;border-radius:999px;font-size:.8rem">${Object.entries(PEST).map(([k,l])=>`<option value="${k}" ${p.estado===k?'selected':''}>${l}</option>`).join('')}</select></div></div>
+     <div class="row">${p.whatsapp?`<a class="btn wa" href="${waLink(p.whatsapp,`Hola ${p.nombre.split(' ')[0]}, soy ${pro('diana').nombre.split(' ')[0]}, fisioterapeuta. Recibí tus datos para la valoración. ¿Cuándo te queda bien?`)}" target="_blank" rel="noopener">Escribir</a>`:''}<button data-act="prosPaciente" data-id="${p.id}">Volver paciente</button><button class="ghost danger" data-act="borrarPros" data-id="${p.id}" aria-label="Eliminar prospecto">✕</button></div></div>`).join('')
+     :`<div class="empty">Cuando llegue alguien por el QR, pega su mensaje arriba y queda en esta lista.</div>`}</div></div>`;
+}
+function drawQR(){const el=$('#qr');const url=cfg().formUrl;if(!el||!url||typeof QRCode==='undefined')return;el.innerHTML='';new QRCode(el,{text:url,width:220,height:220,colorDark:'#3b2433',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}
+function parsePros(t){const g=k=>{const m=t.match(new RegExp(k+'\\s*:\\s*(.+)','i'));return m?m[1].trim():''};
+  const pri=g('Inter[eé]s').toLowerCase();
+  return {nombre:g('Nombre'),whatsapp:g('WhatsApp'),motivo:g('Motivo'),prioridad:pri.includes('muy')?'alta':pri.includes('solo')||pri.includes('pregunta')?'baja':pri?'media':'',detalle:t.trim()}}
+document.addEventListener('input',e=>{if(e.target.id!=='prPegar')return;const r=parsePros(e.target.value);if(r.nombre)$('#prNom').value=r.nombre;if(r.whatsapp)$('#prWa').value=r.whatsapp;if(r.motivo)$('#prMot').value=r.motivo;if(r.prioridad)$('#prPri').value=r.prioridad});
+document.addEventListener('change',async e=>{const id=e.target.dataset?.pest;if(!id)return;await patch('prospectos',id,{estado:e.target.value});toast('Estado actualizado')});
+
+// ===================== Render principal =====================
+function brand(){
+  return `<div class="brand"><div class="logo"><i>F</i>FISIOTERAPIA</div>
+   <div class="small muted" style="font-weight:800">${esc(pro('diana').nombre.split(' ')[0])}</div></div>`;
+}
+function render(){
+  $('#tabs').innerHTML=TABS.map(([k,l])=>`<button class="${S.tab===k?'on':''}" data-tab="${k}" aria-label="${l}">${I[k]}${l}</button>`).join('');
+  const v={hoy:vHoy,pacientes:vPacientes,agenda:vAgenda,captar:vCaptar,preguntas:vPreguntas,ajustes:vAjustes}[S.tab];
+  // no redibujar mientras se escribe una nota o un prospecto (se guarda al salir del campo)
+  const ae=document.activeElement;if(ae&&$('#main').contains(ae)&&ae.matches('textarea,[id^=pr]')&&S.ready&&S._rendered===S.tab)return;
+  let html=brand();
+  if(!db&&S.ready) html+=`<div class="notice small" style="margin-bottom:12px">Para guardar pacientes abre esta página con tu cuenta de Claude. Sin eso, lo que escribas no queda guardado.</div>`;
+  html+=S.ready?v():`<div class="empty">Cargando tus pacientes…</div>`;
+  $('#main').innerHTML=html;S._rendered=S.tab;
+  if(S.tab==='captar')drawQR();
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-tab]');if(b){S.tab=b.dataset.tab;if($('#sheetRoot').innerHTML)closeSheet();render();scrollTo(0,0);return}
+  const a=e.target.closest('[data-act]');if(a){const fn=ACT[a.dataset.act];if(fn){e.preventDefault();e.stopPropagation();fn(a.dataset,a)}}
+});
+document.addEventListener('input',e=>{if(e.target.id==='buscar'){S.q=e.target.value;const pos=e.target.selectionStart;render();const i=$('#buscar');if(i){i.focus();i.setSelectionRange(pos,pos)}}});
+
+function avatar(p,sm){return `<div class="av ${sm?'sm':''} ${p.tipo==='gastro'?'gastro':proDe(p)==='daniel'?'daniel':''}" aria-hidden="true">${esc(iniciales(p.nombre))}</div>`}
+function modPill(m){return m&&MOD[m]?`<span class="pill ${m==='virtual'?'sky':m==='domicilio'?'peach':'gastro'}">${MOD[m]}</span>`:''}
+function citaItem(c){
+  const p=S.pacientes[c.pacienteId];if(!p)return '';
+  const st=c.estado==='hecha'?'<span class="pill mint">Realizada</span>':c.estado==='cancelada'?'<span class="pill bad">No asistió</span>':'';
+  return `<div class="item"><div class="clock">${esc(fmtHora(c.hora))}</div>${avatar(p)}
+   <div class="grow"><div class="name tap" data-act="ficha" data-id="${p.id}">${esc(p.nombre)}</div>
+   <div class="row small" style="gap:6px;margin-top:2px"><span class="pill ${p.tipo==='gastro'?'gastro':''}">${p.tipo==='gastro'?'Gastro · '+(c.etapa==='post'?'Post':'Pre'):esc(etiquetaCita(c))}</span>${modPill(c.modalidad)}<span class="pill mint">${esc(precioCita(c))}</span>${st}</div>${c.nota?`<div class="small muted" style="margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>Plan:</b> ${esc(c.nota)}</div>`:''}</div>
+   ${c.estado==='pendiente'?`<div class="row" style="justify-content:flex-end">${p.telefono?`<a class="btn wa" href="${waLink(p.telefono,msgPaciente(c))}" target="_blank" rel="noopener" aria-label="Recordar por WhatsApp a ${esc(p.nombre)}">WhatsApp</a>`:''}<button class="primary" data-act="sesion" data-cita="${c.id}">Registrar</button></div>`:''}</div>`;
+}
+
+function vHoy(){
+  const c=cfg(), t=today(), m=addDays(t,1);
+  const hoy=citasDia(t), man=citasDia(m);
+  const pendExcel=list(S.sesiones).filter(s=>s.excelEnviado===false&&S.pacientes[s.pacienteId]);
+  const activos=list(S.pacientes).filter(p=>p.estado!=='alta'&&visible(p));
+  const mes=t.slice(0,7);
+  const ingPart=list(S.sesiones).filter(s=>(s.fecha||'').startsWith(mes)&&S.pacientes[s.pacienteId]?.tipo!=='gastro'&&visible(S.pacientes[s.pacienteId]||{})).reduce((a,s)=>a+(Number(s.costo)||0),0);
+  const gastro=list(S.pacientes).filter(p=>p.tipo==='gastro'&&visible(p));
+  const gPorCobrar=gastro.filter(p=>!p.cobrado&&preHecho(p)).length;
+  const porPost=gastro.filter(p=>estadoGastro(p).k==='porpost');
+  const sinVal=activos.filter(p=>p.tipo!=='gastro'&&!p.valoracion);
+  const nombre=', '+pro('diana').nombre.split(' ')[0];
+  return `<div class="stack">
+   <div class="hero"><div class="eyebrow">${esc(fmtFecha(t))}</div><h1>Hola${esc(nombre)}. Tienes ${hoy.filter(x=>x.estado==='pendiente').length||'0'} ${hoy.filter(x=>x.estado==='pendiente').length===1?'paciente':'pacientes'} hoy</h1>
+    <div class="row" style="margin-top:12px"><button class="primary" data-act="nuevo" data-t="particular">+ Particular</button><button class="lila" data-act="nuevo" data-t="gastro">+ Gastro Quirúrgica</button></div></div>
+   <div class="tiles">
+    <div class="tile t1"><b>${activos.length}</b><span>pacientes activos</span></div>
+    <div class="tile t3"><b>${money(ingPart)}</b><span>particulares este mes</span></div>
+    <div class="tile t2"><b>${porPost.length}</b><span>Gastro esperando post</span></div>
+    <div class="tile t4"><b>${money(gPorCobrar*(c.costoGastro||55000))}</b><span>Gastro por cobrar</span></div></div>
+   ${pendExcel.length?`<div class="notice"><b>${pendExcel.length} Excel sin enviar al correo.</b> <div class="row" style="margin-top:8px">${pendExcel.slice(0,5).map(s=>`<button data-act="reenviar" data-id="${s.id}">${esc(S.pacientes[s.pacienteId]?.nombre||'Paciente')} · ${fmtCorto(s.fecha)}</button>`).join('')}</div></div>`:''}
+   <h2>Citas de hoy</h2>
+   <div class="list">${hoy.length?hoy.map(citaItem).join(''):`<div class="empty">No hay citas hoy. Al registrar un paciente, sus citas aparecen aquí.</div>`}</div>
+   <div class="row between"><h2>Mañana · ${esc(fmtFecha(m))}</h2>
+    ${c.telefono?`<a class="btn wa" href="${waLink(c.telefono,msgMio(m))}" target="_blank" rel="noopener">Enviarme la agenda</a>`:`<button data-tab="ajustes">Agrega tu WhatsApp</button>`}</div>
+   <div class="list">${man.length?man.map(citaItem).join(''):`<div class="empty">Sin citas mañana.</div>`}</div>
+   ${porPost.length?`<h2>Gastro Quirúrgica: post por agendar</h2><div class="list">${porPost.map(p=>`<div class="item">${avatar(p)}<div class="grow"><div class="name tap" data-act="ficha" data-id="${p.id}">${esc(p.nombre)}</div><div class="small muted">Pre hecho el ${fmtCorto(estadoGastro(p).pre?.fecha)}</div></div><button class="lila" data-act="agendarPost" data-id="${p.id}">Agendar post</button></div>`).join('')}</div>`:''}
+   ${sinVal.length?`<h2>Valoraciones pendientes</h2><div class="list">${sinVal.map(p=>`<div class="item">${avatar(p)}<div class="grow"><div class="name">${esc(p.nombre)}</div><div class="small muted">${esc(p.patologia||'')}</div></div><button data-act="valoracion" data-id="${p.id}">Valorar</button></div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function ring(h,t,color){const r=15,C=2*Math.PI*r,f=t?Math.min(1,h/t):0;
+  return `<svg class="ring" width="40" height="40" viewBox="0 0 40 40" aria-label="${h} de ${t} sesiones"><circle cx="20" cy="20" r="${r}" fill="none" stroke="var(--line)" stroke-width="5"/><circle cx="20" cy="20" r="${r}" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round" stroke-dasharray="${(C*f).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 20 20)"/><text x="20" y="24" text-anchor="middle" font-size="11" font-weight="800" fill="var(--ink)" font-family="Nunito,sans-serif">${h}</text></svg>`}
+function pasos(p){const e=estadoGastro(p);
+  const st=(c,lab)=>{const cls=c?.estado==='hecha'?'done':c?'sched':'';return `<div class="step ${cls}"><div class="dot">${c?.estado==='hecha'?'✓':lab[0]}</div><small><b>${lab}</b><br>${c?fmtCorto(c.fecha).slice(0,-5)+(c.modalidad?' · '+MOD[c.modalidad]:''):'Por agendar'}</small></div>`};
+  return `<div class="steps">${st(e.pre,'Pre')}<div class="bar ${e.pre?.estado==='hecha'?'on':''}"></div>${st(e.post,'Post')}</div>`}
+
+function vPacientes(){
+  const q=S.q.toLowerCase();
+  const ps=pacientesDe(S.tipo).filter(p=>!q||(p.nombre+' '+p.cedula+' '+p.patologia).toLowerCase().includes(q));
+  const head=`<div class="top"><div><div class="eyebrow">Fichas</div><h1>Pacientes</h1></div><button class="${S.tipo==='gastro'?'lila':'primary'}" data-act="nuevo" data-t="${S.tipo}">+ Paciente</button></div>
+   <div class="seg"><button class="${S.tipo==='particular'?'on':''}" data-act="tipo" data-t="particular">Particulares (${pacientesDe('particular').length})</button><button class="${S.tipo==='gastro'?'on g':''}" data-act="tipo" data-t="gastro">Gastro Quirúrgica (${pacientesDe('gastro').length})</button></div>
+   <input id="buscar" placeholder="Buscar por nombre, cédula o patología" value="${esc(S.q)}">`;
+  if(S.tipo==='gastro')return `<div class="stack">${head}${vGastro(ps)}</div>`;
+  const act=ps.filter(p=>p.estado!=='alta'), alta=ps.filter(p=>p.estado==='alta');
+  const row=p=>`<div class="item tap" data-act="ficha" data-id="${p.id}">${avatar(p)}
+    <div class="grow"><div class="name">${esc(p.nombre)}</div><div class="small muted">${esc(p.patologia||'Sin patología')}</div>
+</div>
+    ${ring(hechas(p.id),p.sesionesTotales||0,'var(--accent)')}</div>`;
+  return `<div class="stack">${head}
+   <div class="list">${act.length?act.map(row).join(''):`<div class="empty">Aún no hay pacientes particulares. Toca “+ Paciente” para registrar el primero.</div>`}</div>
+   ${alta.length?`<details><summary>Dados de alta (${alta.length})</summary><div class="list" style="margin-top:8px">${alta.map(row).join('')}</div></details>`:''}</div>`;
+}
+
+function vGastro(ps){
+  const c=cfg(), val=c.costoGastro||55000;
+  const filtros=[['todos','Todos'],['curso','En curso'],['cobrar','Por cobrar'],['cobrado','Cobrados']];
+  const enCurso=p=>estadoGastro(p).k!=='completo';
+  const f={todos:()=>true,curso:enCurso,cobrar:p=>preHecho(p)&&!p.cobrado,cobrado:p=>p.cobrado}[S.gFiltro];
+  const vis=ps.filter(f);
+  const comp=ps.filter(p=>!enCurso(p)), sinCobrar=ps.filter(p=>preHecho(p)&&!p.cobrado);
+  return `<div class="tiles">
+    <div class="tile t2"><b>${ps.filter(enCurso).length}</b><span>en curso</span></div>
+    <div class="tile t3"><b>${comp.length}</b><span>completos (pre + post)</span></div>
+    <div class="tile t4"><b>${money(sinCobrar.length*val)}</b><span>por cobrar a la clínica (${sinCobrar.length})</span></div>
+    <div class="tile t1"><b>${money(ps.filter(p=>p.cobrado).length*val)}</b><span>ya cobrado</span></div></div>
+   <div class="card stack"><div class="row between"><h2>Registro de cobro</h2><span class="small muted">${money(val)} por paciente · se cobra desde el pre</span></div>
+    <div class="row">${filtros.map(([k,l])=>`<button class="${S.gFiltro===k?'primary':''}" data-act="gFiltro" data-k="${k}">${l}</button>`).join('')}</div>
+    <div class="row"><button data-act="gExcel" data-modo="bajar">Descargar Excel</button><button data-act="gExcel" data-modo="correo">Compartir Excel</button></div></div>
+   <div class="stack">${vis.length?vis.map(p=>{const e=estadoGastro(p);return `<div class="card">
+     <div class="row" style="flex-wrap:nowrap;gap:12px">${avatar(p)}<div style="flex:1;min-width:0"><div class="name tap" data-act="ficha" data-id="${p.id}" style="font-weight:800">${esc(p.nombre)}</div><div class="small muted">C.C. ${esc(p.cedula||'—')}${p.patologia?' · '+esc(p.patologia):''}</div></div><span class="pill ${e.cls}">${e.txt}</span></div>
+     ${pasos(p)}
+     <div class="row between" style="margin-top:8px">
+      <div class="row">${e.k==='nada'?`<button class="lila" data-act="agendarEtapa" data-id="${p.id}" data-e="pre">Agendar pre</button>`:''}${e.k==='porpost'?`<button class="lila" data-act="agendarPost" data-id="${p.id}">Agendar post</button>`:''}
+      ${[e.pre,e.post].filter(x=>x&&x.estado==='pendiente').map(x=>`<button class="primary" data-act="sesion" data-cita="${x.id}">Registrar ${x.etapa==='post'?'post':'pre'}</button>`).join('')}</div>
+      ${preHecho(p)?`<button class="toggle ${p.cobrado?'on':''}" data-act="cobrado" data-id="${p.id}" aria-pressed="${!!p.cobrado}">${p.cobrado?'✓ Cobrado':'Marcar cobrado'}</button>`:''}</div></div>`}).join(''):`<div class="card empty">Sin pacientes en esta vista. Los pacientes que asigna Gastro Quirúrgica se registran con “+ Paciente”.</div>`}</div>`;
+}
+
+function vAgenda(){
+  const now=new Date();
+  if(!S.calMonth)S.calMonth=ymd(new Date(now.getFullYear(),now.getMonth(),1));
+  if(!S.calSel)S.calSel=today();
+  const m0=parse(S.calMonth), start=new Date(m0);start.setDate(1-m0.getDay());
+  let cells='';
+  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const f=ymd(d);const cs=citasDia(f);
+    cells+=`<button class="${d.getMonth()!==m0.getMonth()?'other':''} ${f===today()?'today':''} ${f===S.calSel?'sel':''}" data-act="dia" data-f="${f}" aria-label="${fmtFecha(f)}, ${cs.length} citas"><span class="dn">${d.getDate()}</span>${cs.slice(0,3).map(c=>`<span class="ev ${S.pacientes[c.pacienteId].tipo==='gastro'?'g':''} ${c.estado==='hecha'?'h':''}">${horaCorta(c.hora)} ${esc(S.pacientes[c.pacienteId].nombre.split(' ')[0])}</span>`).join('')}${cs.length>3?`<span class="ev more">+${cs.length-3}</span>`:''}</button>`;}
+  const sel=citasDia(S.calSel), c=cfg();
+  const totalDia=sel.reduce((a,x)=>a+valorCita(x),0);
+  const mesCitas=list(S.citas).filter(x=>x.fecha.startsWith(S.calMonth.slice(0,7))&&S.pacientes[x.pacienteId]&&visible(S.pacientes[x.pacienteId])&&x.estado!=='cancelada');
+  return `<div class="stack"><div class="top"><div><div class="eyebrow">Calendario</div><h1>Agenda</h1></div></div>
+   <div class="card">
+   <div class="row between" style="margin-bottom:10px;flex-wrap:nowrap"><button class="ghost" data-act="mes" data-d="-1" aria-label="Mes anterior">‹</button><h2 style="text-transform:capitalize">${MES[m0.getMonth()]} ${m0.getFullYear()}</h2><button class="ghost" data-act="mes" data-d="1" aria-label="Mes siguiente">›</button></div>
+   <div class="cal">${DOW.map(d=>`<div class="dow">${d[0]}</div>`).join('')}${cells}</div>
+   <div class="row between small" style="margin-top:10px"><div class="row"><span class="pill">Particular</span><span class="pill gastro">Gastro Quirúrgica</span></div><span class="muted">${mesCitas.length} citas · ${money(mesCitas.reduce((a,x)=>a+valorCita(x),0))} en el mes</span></div></div>
+   <div class="row between"><div><h2>${esc(fmtFecha(S.calSel))}</h2>${sel.length?`<div class="small muted">${sel.length} ${sel.length===1?'cita':'citas'} · ${money(totalDia)}</div>`:''}</div>${c.telefono&&sel.length?`<a class="btn wa" href="${waLink(c.telefono,msgMio(S.calSel))}" target="_blank" rel="noopener">Enviarme este día</a>`:''}</div>
+   <div class="stack">${sel.length?sel.map(citaNota).join(''):`<div class="card empty">Sin citas este día.</div>`}</div></div>`;
+}
+
+// Cita del día con su cuadro de notas (plan de la sesión → va al informe)
+function citaNota(c){
+  const p=S.pacientes[c.pacienteId], g=p.tipo==='gastro';
+  return `<div class="card stack" style="gap:10px">
+   <div class="row" style="flex-wrap:nowrap;gap:10px"><div class="clock">${esc(fmtHora(c.hora))}</div>${avatar(p)}
+    <div style="flex:1;min-width:0"><div class="name tap" data-act="ficha" data-id="${p.id}" style="font-weight:800">${esc(p.nombre)}</div>
+    <div class="row small" style="gap:6px;margin-top:2px"><span class="pill ${g?'gastro':''}">${g?'Gastro · '+(c.etapa==='post'?'Post':'Pre'):esc(etiquetaCita(c))}</span>${modPill(c.modalidad)}<span class="pill mint">${esc(precioCita(c))}</span>${c.estado==='hecha'?'<span class="pill done">Realizada</span>':''}</div></div></div>
+   <div><label for="n_${c.id}" class="small">Notas: qué se hará con ${esc(p.nombre.split(' ')[0])} este día</label>
+    <textarea id="n_${c.id}" data-nota="${c.id}" placeholder="Ej: progresar sentadilla a 90°, educación en higiene postural…">${esc(c.nota)}</textarea></div>
+   ${c.estado==='pendiente'?`<div class="row">${p.telefono?`<a class="btn wa" href="${waLink(p.telefono,msgPaciente(c))}" target="_blank" rel="noopener">Recordar por WhatsApp</a>`:''}<button class="${g?'lila':'primary'}" data-act="sesion" data-cita="${c.id}">Registrar sesión</button><button class="ghost" data-act="moverCita" data-id="${c.id}">Mover</button></div>`:''}</div>`;
+}
+document.addEventListener('change',async e=>{const id=e.target.dataset?.nota;if(!id)return;await patch('citas',id,{nota:e.target.value.trim()});toast('Nota guardada')});
+const TIPOS={eva:'Escala 0–10',daniels:'Escala 0–5',texto:'Texto corto',larga:'Texto largo',numero:'Número',sino:'Sí / No',opciones:'Opciones'};
+function vPreguntas(){
+  const qs=list(S.preguntas);
+  const grupo=(f,t)=>{const g=qs.filter(q=>q.fase===f).sort((a,b)=>(a.orden??99)-(b.orden??99));
+    return `<h2>${t}</h2><div class="list">${g.length?g.map(q=>`<div class="item"><div class="grow"><div style="font-weight:800">${esc(q.texto)}</div>
+    <div class="small muted">${TIPOS[q.tipo]||q.tipo}${q.para&&q.para!=='todos'?' · solo '+(q.para==='gastro'?'Gastro Quirúrgica':'Particulares'):''}${q.patologia?' · solo “'+esc(q.patologia)+'”':''} · usada ${q.usos||0} veces</div></div>
+    <button class="ghost" data-act="editq" data-id="${q.id}">Editar</button></div>`).join(''):`<div class="empty">Sin preguntas todavía.</div>`}</div>`};
+  return `<div class="stack"><div class="top"><div><div class="eyebrow">Lo que preguntas y mides</div><h1>Preguntas</h1></div><button class="primary" data-act="editq">+ Pregunta</button></div>
+  <div class="row between"><h2>Medidas de seguimiento</h2><button data-act="editMed">+ Medida</button></div>
+  <p class="small muted" style="margin:0">Rangos, fuerza, funcionalidad, independencia, equilibrio, dolor… En cada paciente eliges cuáles seguir y vuelven en cada sesión.</p>
+  <div class="list">${medCat().length?medCat().map(m=>`<div class="item"><div class="grow"><div style="font-weight:800">${esc(m.nombre)}</div><div class="small muted">${esc(rangoTxt(m))} · ${m.mejor==='bajo'?'mejora si baja':'mejora si sube'} · usada ${m.usos||0} veces</div></div><button class="ghost" data-act="editMed" data-id="${m.id}">Editar</button></div>`).join(''):`<div class="empty">Sin medidas en el catálogo.</div>`}</div>
+  ${grupo('valoracion','Preguntas de valoración')}${grupo('sesion','Preguntas después de cada sesión')}</div>`;
+}
+
+function vAjustes(){
+  const c=cfg();
+  const proCard=k=>{const p=c.profesionales[k];return `<div class="card stack"><div class="row" style="flex-wrap:nowrap">${`<div class="av ${k==='daniel'?'daniel':''}">${esc(iniciales(p.nombre))}</div>`}<div><h2>${esc(p.nombre)}</h2><div class="small muted">Membrete de sus documentos${k==='diana'?' · atiende Gastro Quirúrgica':''}</div></div></div>
+   <div class="grid2"><div><label for="${k}Nom">Nombre en la firma</label><input id="${k}Nom" value="${esc(p.nombre)}"></div><div><label for="${k}Tit">Título</label><input id="${k}Tit" value="${esc(p.titulo)}"></div></div>
+   <div class="grid2"><div><label for="${k}Tp">Tarjeta profesional</label><input id="${k}Tp" value="${esc(p.tp)}"></div><div><label for="${k}Wa">WhatsApp</label><input id="${k}Wa" inputmode="tel" value="${esc(p.whatsapp)}" placeholder="3001234567"></div></div>
+   <div class="grid2"><div><label for="${k}Ig">Instagram</label><input id="${k}Ig" value="${esc(p.instagram)}" placeholder="usuario sin @"></div><div><label for="${k}Co">Correo</label><input id="${k}Co" type="email" value="${esc(p.correo)}"></div></div></div>`};
+  return `<div class="stack"><div class="top"><div><div class="eyebrow">Configuración</div><h1>Ajustes</h1></div></div>
+  ${proCard('diana')}
+  <div class="card stack"><h2>General</h2>
+   <div class="grid2"><div><label for="cCorreo">Tu correo (opcional)</label><input id="cCorreo" type="email" value="${esc(c.correo)}"></div>
+   <div><label for="cTel">WhatsApp para tus recordatorios</label><input id="cTel" inputmode="tel" value="${esc(c.telefono)}" placeholder="3001234567"></div></div>
+   <div class="grid2"><div><label for="cCosto">Valor sesión particular</label><input id="cCosto" inputmode="numeric" value="${esc(c.costo)}"></div>
+   <div><label for="cGastro">Valor Gastro Quirúrgica por paciente (pre + post)</label><input id="cGastro" inputmode="numeric" value="${esc(c.costoGastro)}"></div></div></div>
+  <div class="row"><button class="primary" data-act="guardarCfg">Guardar ajustes</button></div>
+  <div class="card stack" style="border:1.5px solid var(--accent)"><h2>Copia de seguridad</h2>
+   <p class="small muted" style="margin:0">Todo se guarda solo en este celular. Haz una copia cada semana y guárdala en tu correo o Drive: si borras los datos del navegador o cambias de celular, con ella lo recuperas todo.${(()=>{try{const t=localStorage.getItem('fisio_diana_db_v1_t');return t?' Último cambio: '+fmtCorto(t.slice(0,10))+'.':''}catch(e){return ''}})()}</p>
+   <div class="row"><button class="primary" data-act="backup">Compartir copia de seguridad</button><label class="btn" for="restore" style="margin:0">Restaurar copia</label><input type="file" id="restore" accept=".json,application/json" hidden></div></div>
+  <div class="card stack"><h2>Reporte de particulares</h2>
+   <p class="small muted" style="margin:0">Excel con nombre, entidad, fecha, hora, cédula y costo de las sesiones particulares del rango.</p>
+   <div class="grid2"><div><label for="rDesde">Desde</label><input id="rDesde" type="date" value="${today().slice(0,8)}01"></div><div><label for="rHasta">Hasta</label><input id="rHasta" type="date" value="${today()}"></div></div>
+   <div class="row"><button class="primary" data-act="reporte" data-modo="correo">Compartir Excel</button><button data-act="reporte" data-modo="bajar">Descargar</button></div></div></div>`;
+}
+
+// ===================== Hojas =====================
+function openSheet(title,html){
+  $('#sheetRoot').innerHTML=`<div class="sheet" role="dialog" aria-label="${esc(title)}"><div class="sheet-head"><div class="in"><button class="ghost" data-act="cerrar" aria-label="Cerrar">← Volver</button><h2>${esc(title)}</h2></div></div><div class="wrap" style="padding-bottom:40px">${html}</div></div>`;
+  $('#sheetRoot .sheet').scrollTop=0;
+}
+function closeSheet(){$('#sheetRoot').innerHTML='';render()}
+function modSel(id,val){return `<div class="opts" id="${id}">${['domicilio','presencial','virtual'].map(m=>`<button type="button" class="${val===m?'on':''}" data-act="modPick" data-v="${m}">${MOD[m]}</button>`).join('')}</div><div class="small muted" style="margin-top:4px">Opcional. Toca de nuevo para quitar.</div>`}
+const leerMod=id=>document.querySelector(`#${id} button.on`)?.dataset.v||'';
+
+// ---- Formulario de paciente ----
+function fPaciente(p,tipo){
+  const c=cfg();
+  p=p||{tipo:tipo||S.tipo,profesional:S.yo==='daniel'?'daniel':'diana',sesionesTotales:10,dias:[1,3,5],hora:'08:00',fechaInicio:today(),costo:c.costo};
+  const nuevo=!p.id, g=p.tipo==='gastro';
+  openSheet(nuevo?(g?'Nuevo paciente · Gastro Quirúrgica':'Nuevo paciente particular'):'Editar paciente',`<form class="stack" id="fPac" data-id="${p.id||''}" data-tipo="${p.tipo}">
+   ${g?`<div class="card row" style="flex-wrap:nowrap"><div class="av gastro">GQ</div><div><b>Gastro Quirúrgica</b><div class="small muted">Atiende ${esc(pro('diana').nombre)} · 2 sesiones: pre y post · ${money(c.costoGastro)} por paciente</div></div></div>`
+   :''}
+   <div><label for="pNom">Nombre completo</label><input id="pNom" required value="${esc(p.nombre)}"></div>
+   <div class="grid2"><div><label for="pCed">Cédula</label><input id="pCed" inputmode="numeric" value="${esc(p.cedula)}"></div><div><label for="pEdad">Edad</label><input id="pEdad" inputmode="numeric" value="${esc(p.edad)}"></div></div>
+   <div class="grid2"><div><label for="pTel">WhatsApp</label><input id="pTel" inputmode="tel" value="${esc(p.telefono)}" placeholder="3001234567"></div><div><label for="pCor">Correo electrónico</label><input id="pCor" type="email" value="${esc(p.correo)}" placeholder="paciente@correo.com"></div></div>
+   ${g?'':`<div><label for="pEnt">Entidad</label><input id="pEnt" list="lEnt" value="${esc(p.entidad)}" placeholder="EPS, prepagada o Particular"><datalist id="lEnt">${[...new Set(list(S.pacientes).map(x=>x.entidad).filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist></div>`}
+   ${g?'':`<div class="card stack" style="gap:8px;background:var(--mint);border-color:transparent"><label for="pCosto" style="margin:0;color:var(--mint-ink)">Valor por sesión de este paciente</label>
+    <div class="row"><input id="pCosto" inputmode="numeric" value="${esc(p.costo)}" style="max-width:170px;background:var(--surface)" aria-describedby="pCostoAy"><button type="button" class="chip" data-act="precio" data-v="60000">$60.000 domicilio</button><button type="button" class="chip" data-act="precio" data-v="45000">$45.000 virtual</button></div>
+    <div class="small" id="pCostoAy" style="color:var(--mint-ink)">Escribe el valor acordado con este paciente si es distinto.</div></div>`}
+   <div><label for="pPat">${g?'Procedimiento / diagnóstico':'Patología / diagnóstico'}</label><input id="pPat" list="lPat" value="${esc(p.patologia)}"><datalist id="lPat">${[...new Set(list(S.pacientes).filter(x=>x.tipo===p.tipo).map(x=>x.patologia).filter(Boolean))].map(x=>`<option value="${esc(x)}">`).join('')}</datalist></div>
+   ${nuevo&&g?`<div class="card stack"><h3>Sesión pre‑quirúrgica</h3>
+    <div class="grid2"><div><label for="pIni">Fecha</label><input id="pIni" type="date" value="${today()}"></div><div><label for="pHora">Hora</label><input id="pHora" type="time" value="08:00"></div></div>
+    <div><label>Modalidad</label>${modSel('pMod','')}</div>
+    <p class="small muted" style="margin:0">La post‑quirúrgica queda “por agendar” hasta que se sepa la fecha de la cirugía.</p></div>`:''}
+   ${nuevo&&!g?`<div class="card stack"><h3>Días de atención</h3>
+    <div class="days" id="pDias">${[1,2,3,4,5,6,0].map(d=>`<button type="button" class="${(p.dias||[]).includes(d)?'on':''}" data-act="dia-sem" data-d="${d}">${DOW[d]}</button>`).join('')}</div>
+    <div class="grid2"><div><label for="pHora">Hora</label><input id="pHora" type="time" value="${p.hora}"></div><div><label for="pIni">Primera sesión</label><input id="pIni" type="date" value="${p.fechaInicio}"></div></div>
+    <div><label for="pN">Número de sesiones</label><input id="pN" inputmode="numeric" value="${p.sesionesTotales}" style="max-width:160px"></div>
+    <div><label>Modalidad habitual</label>${modSel('pMod','')}</div>
+    <p class="small muted" style="margin:0">Se crean todas las citas en el calendario. Luego puedes mover cualquiera.</p></div>`:''}
+   ${!nuevo&&!g?`<div><label for="pN">Número de sesiones</label><input id="pN" inputmode="numeric" value="${p.sesionesTotales}" style="max-width:160px"></div>`:''}
+   <div><label for="pNotas">Notas</label><textarea id="pNotas">${esc(p.notas)}</textarea></div>
+   <div class="row"><button class="${g?'lila':'primary'}" data-act="guardarPac">${nuevo?(g?'Registrar y agendar pre':'Registrar y crear citas'):'Guardar cambios'}</button></div></form>`);
+}
+function planCitas(ini,dias,n){const out=[];let f=ini,g=0;while(out.length<n&&g<500){if(dias.includes(parse(f).getDay()))out.push(f);f=addDays(f,1);g++}return out}
+
+// ---- Ficha ----
+function ficha(id){
+  const p=S.pacientes[id];if(!p)return closeSheet();
+  const cs=citasDe(id), ss=sesionesDe(id), prox=cs.find(c=>c.estado==='pendiente'), g=p.tipo==='gastro', pr=pro(proDe(p));
+  const e=g?estadoGastro(p):null;
+  openSheet(p.nombre,`<div class="stack">
+   <div class="card"><div class="row" style="flex-wrap:nowrap;gap:12px">${avatar(p)}<div style="flex:1;min-width:0"><h2 style="white-space:normal">${esc(p.nombre)}</h2>
+    <div class="row" style="gap:6px;margin-top:4px"><span class="pill ${g?'gastro':''}">${g?'Gastro Quirúrgica':'Particular'}</span><span class="pill ${proDe(p)==='daniel'?'sky':''}">${esc(pr.nombre)}</span>${p.estado==='alta'?'<span class="pill done">De alta</span>':''}${g?`<span class="pill ${e.cls}">${e.txt}</span>`:''}</div></div></div>
+    ${g?pasos(p):''}
+    <table class="small" style="width:100%;border-collapse:collapse;margin-top:10px">
+    ${[['Cédula',p.cedula],[g?'Procedimiento':'Patología',p.patologia],['Edad',p.edad],['WhatsApp',p.telefono],['Correo',p.correo]].concat(g?[['Valor',money(cfg().costoGastro)+' (pre + post)'],['Cobro',p.cobrado?'Cobrado':'Pendiente']]:[['Entidad',p.entidad],['Valor por sesión',money(p.costo)],['Sesiones',`${hechas(id)} realizadas de ${p.sesionesTotales||cs.length}`]]).map(([k,v])=>`<tr><td class="muted" style="padding:5px 0;width:38%">${k}</td><td style="padding:5px 0;overflow-wrap:anywhere">${esc(v||'—')}</td></tr>`).join('')}
+    </table>${p.notas?`<p class="small" style="margin:8px 0 0">${esc(p.notas)}</p>`:''}</div>
+   <div class="row">
+    ${prox?`<button class="${g?'lila':'primary'}" data-act="sesion" data-cita="${prox.id}">Registrar ${g?(prox.etapa==='post'?'post':'pre'):'sesión'}</button>`:''}
+    ${g&&e.k==='porpost'?`<button class="lila" data-act="agendarPost" data-id="${id}">Agendar post</button>`:''}
+    ${g&&e.k==='nada'?`<button class="lila" data-act="agendarEtapa" data-id="${id}" data-e="pre">Agendar pre</button>`:''}
+    ${p.telefono?`<a class="btn wa" href="${waLink(p.telefono)}" target="_blank" rel="noopener">WhatsApp</a>`:''}
+    ${!g?`<button data-act="valoracion" data-id="${id}">${p.valoracion?'Editar valoración':'Hacer valoración'}</button>`:''}
+    ${!g&&p.valoracion?`<button data-act="doc" data-id="${id}" data-k="valoracion">PDF de valoración</button>`:''}
+    ${!g?`<button data-act="doc" data-id="${id}" data-k="informe">Informe de avances</button>`:''}
+    <button data-act="editPac" data-id="${id}">Editar datos</button>
+   </div>
+   ${g?`<div class="card small muted">Instructivo de ejercicios en imágenes (movilidad temprana): lo agregamos en la siguiente versión.</div>`:''}
+   ${(p.medidas||[]).length?`<div class="stack"><h2>Evolución</h2>${evolucion(p)}</div>`:(!g?`<div class="card small muted">Este paciente aún no tiene medidas de seguimiento. Defínelas en la valoración.</div>`:'')}
+   <div class="row between"><h2>Citas</h2>${!g?`<button data-act="addCita" data-id="${id}">+ Cita</button>`:''}</div>
+   <div class="list">${cs.length?cs.map(c=>`<div class="item"><div class="clock" style="min-width:90px">${fmtCorto(c.fecha)}<br><span class="small muted">${fmtHora(c.hora)}</span></div>
+     <div class="grow row small" style="gap:6px">${g?`<span class="pill gastro">${c.etapa==='post'?'Post':'Pre'}</span>`:''}${c.estado==='hecha'?'<span class="pill mint">Realizada</span>':c.estado==='cancelada'?'<span class="pill bad">No asistió</span>':'<span class="pill">Pendiente</span>'}${modPill(c.modalidad)}</div>
+     ${c.estado==='pendiente'?`${p.telefono?`<a class="btn wa" href="${waLink(p.telefono,msgPaciente(c))}" target="_blank" rel="noopener" aria-label="Recordar por WhatsApp">WA</a>`:''}<button class="ghost" data-act="moverCita" data-id="${c.id}">Mover</button>`:''}
+     ${c.estado==='hecha'?`<button class="ghost" data-act="verSesion" data-cita="${c.id}">Ver</button>`:''}</div>`).join(''):`<div class="empty">Sin citas.</div>`}</div>
+   <div class="row">${!g?(p.estado==='alta'?`<button data-act="reactivar" data-id="${id}">Reactivar</button>`:`<button data-act="alta" data-id="${id}">Dar de alta</button>`):''}<button class="ghost danger" data-act="borrarPac" data-id="${id}">Eliminar paciente</button></div>
+  </div>`);
+}
+
+// ===================== Medidas de seguimiento =====================
+let W={medidas:[],sug:[]};
+const num=x=>x===''||x==null||isNaN(+x)?null:+x;
+const r1=v=>Math.round(v*10)/10;
+const medCat=()=>list(S.medidas).sort((a,b)=>(b.usos||0)-(a.usos||0)||(a.nombre||'').localeCompare(b.nombre||''));
+const rangoTxt=m=>m.tipo==='eva'?'Escala 0–10':m.tipo==='daniels'?'Escala 0–5':[num(m.min)!==null&&num(m.max)!==null?`${m.min}–${m.max}`:'',m.unidad].filter(Boolean).join(' ')||'Número';
+const fmtV=(m,v)=>v==null?'—':r1(v)+(m.unidad?' '+m.unidad:'');
+const fromCat=(c,det)=>({catId:c.id,nombre:det?c.nombre+' · '+det:c.nombre,detalle:det||'',unidad:c.unidad||'',min:c.min??'',max:c.max??'',mejor:c.mejor||'alto',tipo:c.tipo||'numero'});
+function sugeridasMed(p){
+  const words=(p.patologia||'').toLowerCase().split(/[^a-záéíóúñü]+/).filter(w=>w.length>3);
+  if(!words.length)return [];
+  const cnt={};
+  list(S.pacientes).forEach(o=>{if(o.id===p.id||!o.medidas)return;const op=(o.patologia||'').toLowerCase();if(!words.some(w=>op.includes(w)))return;
+    o.medidas.forEach(m=>{const k=m.catId+'|'+(m.detalle||'');(cnt[k]=cnt[k]||{m,n:0}).n++})});
+  return Object.values(cnt).sort((a,b)=>b.n-a.n).slice(0,8).map(x=>x.m);
+}
+function serie(p,m){
+  const out=[];const b=num(p.medidasBase?.[m.mid]);if(b!==null)out.push({lab:'Val.',v:b});
+  sesionesDe(p.id).forEach((s,i)=>{const v=num(s.medidas?.[m.mid]);if(v!==null)out.push({lab:'S'+(i+1),v})});
+  return out;
+}
+function cambio(m,a,b){const d=b-a;const lo=num(m.min),hi=num(m.max);const rango=lo!==null&&hi!==null?hi-lo:0;
+  return {d,igual:d===0,mejora:m.mejor==='bajo'?d<0:d>0,pct:rango>0?Math.round(Math.abs(d)/rango*100):(a?Math.round(Math.abs(d)/Math.abs(a)*100):null)}}
+function spark(m,pts){
+  if(pts.length<2)return '';
+  const vs=pts.map(x=>x.v);let lo=num(m.min)??Math.min(...vs),hi=num(m.max)??Math.max(...vs);if(m.tipo==='eva'){lo=0;hi=10}if(m.tipo==='daniels'){lo=0;hi=5}if(hi===lo)hi=lo+1;
+  const w=110,h=36,x=i=>4+(w-8)*i/(pts.length-1),y=v=>4+(h-8)*(1-(v-lo)/(hi-lo));
+  const d=pts.map((pt,i)=>(i?'L':'M')+x(i).toFixed(1)+' '+y(pt.v).toFixed(1)).join(' ');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><path d="${d} L${x(pts.length-1).toFixed(1)} ${h} L${x(0)} ${h}Z" fill="var(--accent-soft)"/><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/><circle cx="${x(pts.length-1)}" cy="${y(pts[pts.length-1].v)}" r="3.5" fill="var(--accent)"/></svg>`;
+}
+function evolucion(p){
+  return `<div class="list">${p.medidas.map(m=>{const s=serie(p,m);const a=s[0]?.v,b=s[s.length-1]?.v;const c=s.length>1?cambio(m,a,b):null;
+   return `<div class="item" style="flex-wrap:wrap"><div class="grow" style="min-width:150px"><div class="name" style="white-space:normal">${esc(m.nombre)}</div>
+    <div class="small muted">${s.length?`${fmtV(m,a)} → ${fmtV(m,b)}`:'Sin datos aún'} · ${m.mejor==='bajo'?'mejora si baja':'mejora si sube'}</div></div>
+    ${spark(m,s)}${c?`<span class="pill ${c.igual?'done':c.mejora?'mint':'bad'}">${c.igual?'Igual':(c.mejora?'Mejoró ':'Empeoró ')+(c.d>0?'+':'')+r1(c.d)+(m.unidad?' '+m.unidad:'')}</span>`:''}</div>`}).join('')}</div>`;
+}
+const EVA_COL=v=>v<=3?'var(--ok)':v<=6?'var(--warn)':'var(--bad)';
+function escala(attr,key,tipo,val){
+  if(tipo==='eva')return `<div class="eva" ${attr}="${key}">${[...Array(11)].map((_,i)=>`<button type="button" data-act="pick" data-v="${i}" class="${String(val)===String(i)?'on':''}" style="${String(val)===String(i)?'background:'+EVA_COL(i):''}">${i}</button>`).join('')}</div><div class="eva-legend"><span>0</span><span>10</span></div>`;
+  return `<div class="scale5" ${attr}="${key}">${[0,1,2,3,4,5].map(i=>`<button type="button" data-act="pick" data-v="${i}" class="${String(val)===String(i)?'on':''}">${i}</button>`).join('')}</div>`;
+}
+function medRow(m,val,{quitar=false,hint=''}={}){
+  const inp=m.tipo==='eva'||m.tipo==='daniels'?escala('data-m',m.mid,m.tipo,val)
+   :`<div class="row" style="flex-wrap:nowrap"><input id="m_${m.mid}" data-m="${m.mid}" inputmode="decimal" value="${esc(val??'')}" placeholder="${num(m.min)!==null&&num(m.max)!==null?esc(m.min+'–'+m.max):''}" style="max-width:170px"><span class="muted">${esc(m.unidad||'')}</span></div>`;
+  return `<div class="qrow" data-mrow="${m.mid}"><div class="row between" style="flex-wrap:nowrap"><label for="m_${m.mid}" style="margin:0">${esc(m.nombre)} <span class="small muted" style="font-weight:600">(${m.mejor==='bajo'?'mejora si baja':'mejora si sube'})</span></label>
+   ${quitar?`<button type="button" class="ghost danger" data-act="quitarMed" data-mid="${m.mid}">Quitar</button>`:''}</div>${inp}${hint?`<div class="small muted" style="margin-top:4px">${hint}</div>`:''}</div>`;
+}
+function leerMed(form){const r={};form.querySelectorAll('[data-m]').forEach(el=>{if(el.matches('input')){if(el.value.trim()!=='')r[el.dataset.m]=el.value.trim().replace(',','.')}else{const on=el.querySelector('button.on');if(on)r[el.dataset.m]=on.dataset.v}});return r}
+function medEditor(p){
+  W.sug=sugeridasMed(p).filter(s=>!W.medidas.some(x=>x.catId===s.catId&&(x.detalle||'')===(s.detalle||'')));
+  return `${W.sug.length?`<div><div class="eyebrow" style="margin-bottom:6px">Usadas antes en “${esc(p.patologia)}”</div><div class="chips">${W.sug.map((m,i)=>`<button type="button" class="chip" data-act="addMedSug" data-i="${i}">+ ${esc(m.nombre)}</button>`).join('')}</div></div>`:''}
+   <div><div class="eyebrow" style="margin-bottom:6px">Catálogo de medidas</div><div class="chips">${medCat().map(c=>`<button type="button" class="chip" data-act="addMed" data-cat="${c.id}">+ ${esc(c.nombre)}</button>`).join('')}</div></div>
+   <div id="medDet"></div>
+   <details><summary>Crear una medida nueva</summary><div class="stack" style="margin-top:10px">
+    <div class="grid2"><div><label for="nmNom">Nombre</label><input id="nmNom" placeholder="Ej: Distancia dedos-suelo"></div><div><label for="nmUni">Unidad</label><input id="nmUni" placeholder="cm, °, s, puntos…"></div></div>
+    <div class="grid2"><div><label for="nmMin">Mínimo</label><input id="nmMin" inputmode="decimal"></div><div><label for="nmMax">Máximo</label><input id="nmMax" inputmode="decimal"></div></div>
+    <div class="grid2"><div><label for="nmMej">¿Cuándo es mejoría?</label><select id="nmMej"><option value="alto">Si el número sube</option><option value="bajo">Si el número baja</option></select></div>
+    <div><label for="nmTipo">Forma de registrar</label><select id="nmTipo"><option value="numero">Número</option><option value="eva">Escala 0–10</option><option value="daniels">Escala 0–5</option></select></div></div>
+    <button type="button" class="primary" data-act="crearMed">Crear y agregar al paciente</button></div></details>`;
+}
+function pushMed(m){
+  m=Object.assign({},m,{mid:uid('m')});W.medidas.push(m);
+  const box=$('#medList');box.querySelector('.empty')?.remove();
+  box.insertAdjacentHTML('beforeend',medRow(m,'',{quitar:true}));
+  box.lastElementChild.scrollIntoView({block:'center',behavior:'smooth'});
+}
+function medSeccion(p,{base}){
+  const prevIds=new Set((p.medidas||[]).map(m=>m.mid));
+  const rows=W.medidas.map(m=>{
+    if(base)return medRow(m,p.medidasBase?.[m.mid],{quitar:true});
+    const s=serie(p,m);const ini=s[0],ult=s[s.length-1];
+    return medRow(m,'',{quitar:!prevIds.has(m.mid),hint:s.length?`Inicial: ${fmtV(m,ini.v)}${s.length>1?' · Última: '+fmtV(m,ult.v):''}`:''});
+  }).join('');
+  return `<div class="card stack"><h3>${base?'¿Qué vas a medir y seguir en este paciente?':'Mediciones de hoy'}</h3>
+   <p class="small muted" style="margin:0">${base?'Agrega lo que importa para esta patología: rangos, fuerza, funcionalidad, independencia, equilibrio, dolor… Aquí anotas el valor inicial y cada sesión te las vuelve a pedir.':'Deja en blanco lo que no midas hoy.'}</p>
+   <div id="medList" class="stack">${rows||'<div class="empty">Todavía no hay medidas. Toca una del catálogo.</div>'}</div>
+   ${base?medEditor(p):`<details><summary>Medir algo nuevo en este paciente</summary><div class="stack" style="margin-top:10px">${medEditor(p)}</div></details>`}</div>`;
+}
+
+// ---- Campos de pregunta ----
+function campo(q,val,quitar){
+  const id='q_'+q.id; let inp='';
+  if(q.tipo==='eva'||q.tipo==='daniels') inp=escala('data-q',q.id,q.tipo,val);
+  else if(q.tipo==='sino'||q.tipo==='opciones'){const op=q.tipo==='sino'?['Sí','No']:(q.opciones||'').split(',').map(s=>s.trim()).filter(Boolean);
+    inp=`<div class="opts" data-q="${q.id}">${op.map(o=>`<button type="button" data-act="pick" data-v="${esc(o)}" class="${val===o?'on':''}">${esc(o)}</button>`).join('')}</div>`}
+  else if(q.tipo==='larga') inp=`<textarea id="${id}" data-q="${q.id}">${esc(val)}</textarea>${sugeridas(q)}`;
+  else inp=`<input id="${id}" data-q="${q.id}" ${q.tipo==='numero'?'inputmode="decimal"':''} list="l_${q.id}" value="${esc(val)}"><datalist id="l_${q.id}">${aprendidas(q.id).map(x=>`<option value="${esc(x)}">`).join('')}</datalist>`;
+  return `<div class="qrow" data-qrow="${q.id}">${quitar?`<div class="row between" style="flex-wrap:nowrap"><label for="${id}" style="margin:0">${esc(q.texto)}</label><button type="button" class="ghost danger" data-act="quitarQ" data-q="${q.id}" aria-label="Quitar ${esc(q.texto)}">Quitar</button></div>`:`<label for="${id}">${esc(q.texto)}</label>`}${inp}</div>`;
+}
+function sugeridas(q){const a=aprendidas(q.id).slice(0,8);if(!a.length)return '';
+  return `<div class="chips" style="margin-top:6px">${a.map(x=>`<button type="button" class="chip" data-act="usar" data-q="${q.id}" data-v="${esc(x)}">${esc(x.length>40?x.slice(0,40)+'…':x)}</button>`).join('')}</div>`}
+function leer(form){
+  const r={};
+  form.querySelectorAll('[data-q]').forEach(el=>{
+    if(el.classList.contains('chip'))return;
+    if(el.matches('input,textarea')){if(el.value.trim())r[el.dataset.q]=el.value.trim()}
+    else{const on=el.querySelector('button.on');if(on)r[el.dataset.q]=on.dataset.v}
+  });return r;
+}
+function bloqueAgregar(fase,p){
+  return `<details class="card" id="addQ"><summary>Agregar una pregunta nueva</summary><div class="stack" style="margin-top:10px">
+   <input id="nqTexto" placeholder="Ej: ¿Patrón respiratorio?">
+   <div class="grid2"><select id="nqTipo" aria-label="Tipo de respuesta">${Object.entries(TIPOS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select>
+   <select id="nqAlc" aria-label="Para quién aplica"><option value="todos">Para todos los pacientes</option><option value="tipo">Solo ${p.tipo==='gastro'?'Gastro Quirúrgica':'Particulares'}</option>${p.patologia?`<option value="pat">Solo “${esc(p.patologia)}”</option>`:''}</select></div>
+   <input id="nqOps" placeholder="Opciones separadas por coma (solo si es de opciones)">
+   <div class="row"><button type="button" class="primary" data-act="addQ" data-fase="${fase}" data-pid="${p.id}">Agregar al formulario</button>
+   ${sample?`<button type="button" data-act="sugerirQ" data-fase="${fase}" data-pid="${p.id}">Sugerir preguntas con Claude</button>`:''}</div>
+   <div id="sugQ" class="chips"></div></div></details>`;
+}
+
+// ---- Valoración ----
+function valoracion(id){
+  const p=S.pacientes[id], todas=preguntasPara('valoracion',p), v=p.valoracion||{};
+  W={medidas:(p.medidas||[]).map(m=>Object.assign({},m)),sug:[],ocultas:new Set(p.valOcultas||[])};
+  const qs=todas.filter(q=>!W.ocultas.has(q.id)), quit=todas.filter(q=>W.ocultas.has(q.id));
+  openSheet('Valoración · '+p.nombre,`<form class="stack" id="fForm" data-fase="valoracion" data-pid="${id}">
+   <p class="small muted" style="margin:0">${p.valoracionFecha?'Realizada el '+fmtCorto(p.valoracionFecha)+'. Puedes corregirla.':'Valoración inicial. Las preguntas salen de tu banco; las medidas las eliges para este paciente.'}</p>
+   ${medSeccion(p,{base:true})}
+   <h3>Preguntas de la valoración</h3>
+   <div class="card stack" id="qs">${qs.map(q=>campo(q,v[q.id],true)).join('')}</div>
+   <div id="quitadas">${quitBox(quit)}</div>
+   <div class="card stack"><div class="row between"><h3>Datos adicionales de este paciente</h3><button type="button" class="primary" data-act="addExtra" aria-label="Agregar un dato">+ Agregar dato</button></div>
+    <div id="extras" class="stack">${(p.valExtra||[]).map(x=>extraRow(x)).join('')}</div>
+    <p class="small muted" style="margin:0">Para lo que no aparece arriba. Marca “Guardar en mis preguntas” si quieres que salga en las próximas valoraciones.</p></div>
+   ${bloqueAgregar('valoracion',p)}
+
+   <div class="row"><button class="primary" data-act="guardarVal">Guardar valoración y generar PDF</button></div></form>`);
+}
+function quitBox(qs){return qs.length?`<details class="card"><summary>Preguntas quitadas en este paciente (${qs.length})</summary><div class="chips" style="margin-top:10px">${qs.map(q=>`<button type="button" class="chip" data-act="volverQ" data-q="${q.id}">+ ${esc(q.texto)}</button>`).join('')}</div></details>`:''}
+function extraRow(x){x=x||{};const k=uid('e');return `<div class="qrow" data-extra="${k}"><div class="row" style="flex-wrap:nowrap"><input aria-label="Nombre del dato" data-ex="label" value="${esc(x.label)}" placeholder="Ej: Hallazgos de la marcha" style="font-weight:800"><button type="button" class="ghost danger" data-act="quitarExtra" data-k="${k}" aria-label="Quitar dato">✕</button></div>
+  <textarea aria-label="Valor" data-ex="valor" style="margin-top:6px;min-height:56px" placeholder="Escribe aquí">${esc(x.valor)}</textarea>
+  <label class="small" style="display:flex;gap:6px;align-items:center;font-weight:700;margin-top:4px"><input type="checkbox" data-ex="banco" style="width:auto"> Guardar en mis preguntas</label></div>`}
+
+// ---- Sesión ----
+function sesion(citaId){
+  const c=S.citas[citaId], p=S.pacientes[c.pacienteId], g=p.tipo==='gastro';
+  const qs=preguntasPara('sesion',p), prev=sesionesDe(p.id).slice(-1)[0];
+  W={medidas:(p.medidas||[]).map(m=>Object.assign({},m)),sug:[]};
+  openSheet(`${g?ETAPA[c.etapa]:etiquetaCita(c)} · ${p.nombre}`,`<form class="stack" id="fForm" data-fase="sesion" data-pid="${p.id}" data-cita="${citaId}">
+   <div class="grid2"><div><label for="sFecha">Fecha</label><input id="sFecha" type="date" value="${c.fecha}"></div><div><label for="sHora">Hora</label><input id="sHora" type="time" value="${c.hora}"></div></div>
+   <div><label>Modalidad</label>${modSel('sMod',c.modalidad||'')}</div>
+   <div><label for="sNota">Notas de la sesión (va al informe)</label><textarea id="sNota" placeholder="Qué se planeó o qué se hizo con el paciente hoy">${esc(c.nota)}</textarea></div>
+   ${medSeccion(p,{base:false})}
+   <h3>Lo que se hizo</h3>
+   ${prev?`<button type="button" data-act="repetir">Copiar lo de la sesión anterior (${fmtCorto(prev.fecha)})</button>`:''}
+   <div class="card stack" id="qs">${qs.map(q=>campo(q,'')).join('')||'<p class="muted">Agrega preguntas abajo.</p>'}</div>
+   ${bloqueAgregar('sesion',p)}
+   <div class="card small">${g?`<b>Al guardar:</b> queda marcada la ${c.etapa==='post'?'post‑quirúrgica':'pre‑quirúrgica'} en el registro de cobro de Gastro Quirúrgica.`:`<b>Al guardar:</b> la sesión queda registrada con su valor (${money(p.costo||cfg().costo)}). El Excel de atenciones lo compartes desde Ajustes.`}</div>
+   <div class="row"><button class="${g?'lila':'primary'}" data-act="guardarSes">${g?'Guardar sesión':'Guardar sesión'}</button><button type="button" class="ghost danger" data-act="cancelarCita" data-id="${citaId}">Marcar no asistió</button></div></form>`);
+}
+
+// ---- Excel y correo ----
+const XMIME='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+function hojaB64(data,titulo,cols,moneyCols){
+  const ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=cols.map(w=>({wch:w}));
+  for(let i=1;i<data.length;i++)moneyCols.forEach(L=>{const ref=L+(i+1);if(ws[ref]&&typeof ws[ref].v==='number')ws[ref].z='"$"#,##0'});
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,titulo.slice(0,30));
+  return XLSX.write(wb,{type:'base64',bookType:'xlsx'});
+}
+function excelB64(rows,titulo){
+  const data=[['Nombre del paciente','Entidad','Fecha de atención','Hora','Cédula','Modalidad','Profesional','Costo']].concat(rows.map(r=>[r.nombre,r.entidad,r.fecha,r.hora,r.cedula,r.modalidad,r.profesional,Number(r.costo)||0]));
+  if(rows.length>1)data.push(['TOTAL','','','','','','',rows.reduce((a,r)=>a+(Number(r.costo)||0),0)]);
+  return hojaB64(data,titulo,[30,18,14,10,14,12,20,12],['H']);
+}
+const filaDe=s=>{const p=S.pacientes[s.pacienteId]||{};return {nombre:p.nombre,entidad:p.entidad||'Particular',fecha:fmtCorto(s.fecha),hora:fmtHora(s.hora),cedula:p.cedula,modalidad:MOD[s.modalidad]||'',profesional:pro(proDe(p)).nombre,costo:s.costo}};
+function gastroB64(ps){
+  const val=cfg().costoGastro||55000;
+  const data=[['Paciente','Cédula','WhatsApp','Correo','Procedimiento','Pre fecha','Pre hora','Pre modalidad','Pre estado','Post fecha','Post hora','Post modalidad','Post estado','Estado','Valor','Cobrado']];
+  ps.forEach(p=>{const e=estadoGastro(p);const est=c=>!c?'Por agendar':c.estado==='hecha'?'Realizada':c.estado==='cancelada'?'No asistió':'Agendada';
+    data.push([p.nombre,p.cedula||'',p.telefono||'',p.correo||'',p.patologia||'',fmtCorto(e.pre?.fecha),fmtHora(e.pre?.hora),MOD[e.pre?.modalidad]||'',est(e.pre),fmtCorto(e.post?.fecha),fmtHora(e.post?.hora),MOD[e.post?.modalidad]||'',est(e.post),e.txt,val,p.cobrado?'Sí':'No'])});
+  const conPre=ps.filter(preHecho);
+  data.push([]);data.push(['Con pre realizado',conPre.length,'','','','','','','','','','','','Por cobrar',conPre.filter(p=>!p.cobrado).length*val,'']);
+  return hojaB64(data,'Gastro Quirúrgica',[28,13,13,24,20,11,10,12,11,11,10,12,11,22,11,9],['O']);
+}
+async function enviarCorreo({to,subject,body,htmlBody,attach}){
+  to=to||cfg().correo; if(!to)throw new Error('sin_correo');
+  if(!mcp)mcp=await window.claude?.use('mcp'); if(!mcp)throw new Error('sin_gmail');
+  const input={to:[to],subject};
+  const cc=pro('diana').correo; if(cc&&cc.toLowerCase()!==to.toLowerCase())input.cc=[cc]; // todo llega también a Diana
+  if(body)input.body=body; if(htmlBody)input.htmlBody=htmlBody;
+  if(attach)input.attachments=[attach];
+  await mcp.callTool('Gmail','send_message',input);
+}
+const errCorreo=e=>e.message==='sin_correo'?'Falta el correo de destino.':(e.code==='server_not_connected'||e.message==='sin_gmail')?'Conecta Gmail en claude.ai para enviar correos.':'No se pudo enviar el correo.';
+async function bajar(filename,b64,mime){
+  if(!downloads)downloads=await window.claude?.use('downloads');
+  if(!downloads){toast('Descargar no está disponible aquí.');return}
+  const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  try{await downloads.save({filename,data:new Blob([bin],{type:mime})})}catch(e){}
+}
+async function enviarExcelSesion(s){
+  const p=S.pacientes[s.pacienteId]; const fn=`Atencion_${(p.nombre||'paciente').replace(/\s+/g,'_')}_${s.fecha}.xlsx`;
+  const b64=excelB64([filaDe(s)],'Atención');
+  try{await enviarCorreo({subject:`Atención fisioterapia · ${p.nombre} · ${fmtCorto(s.fecha)} ${fmtHora(s.hora)}`,
+     body:`Paciente: ${p.nombre}\nC.C.: ${p.cedula||'—'}\nEntidad: ${p.entidad||'—'}\nFecha: ${fmtFecha(s.fecha)} ${fmtHora(s.hora)}\nModalidad: ${MOD[s.modalidad]||'—'}\nProfesional: ${pro(proDe(p)).nombre}\nCosto: ${money(s.costo)}\n\nExcel adjunto.`,
+     attach:{content:b64,filename:fn,mimeType:XMIME}});
+   await patch('sesiones',s.id,{excelEnviado:true});toast('Excel enviado a '+cfg().correo);
+  }catch(e){await patch('sesiones',s.id,{excelEnviado:false});toast(errCorreo(e)+' Quedó pendiente en “Hoy”.',4200)}
+}
+
+// ---- Documentos con membrete ----
+function datosInforme(p){
+  const ss=sesionesDe(p.id), qv=preguntasPara('valoracion',p), qsS=preguntasPara('sesion',p);
+  const meds=(p.medidas||[]).map(m=>{const s=serie(p,m);const a=s[0]?.v,b=s[s.length-1]?.v;return {m,s,a,b,c:s.length>1?cambio(m,a,b):null}});
+  const hizo={};qsS.filter(q=>q.tipo==='texto'||q.tipo==='larga').forEach(q=>{const u=new Set();ss.forEach(s=>{const v=s.respuestas?.[q.id];if(v)u.add(v)});if(u.size)hizo[q.texto]=[...u]});
+  const notas=citasDe(p.id).filter(c=>c.nota&&c.estado!=='cancelada').map(c=>({fecha:c.fecha,nota:c.nota,hecha:c.estado==='hecha'}));
+  return {ss,qv,meds,hizo,notas};
+}
+// HTML con estilos en línea: sirve igual en la página, en el correo y en Word
+function docHTML(p,kind,narr){
+  const pr=pro(proDe(p)), d=datosInforme(p);
+  const R='#d6457f', Rs='#ffe3ee', L='#f4dce6', T='#3b2433', M='#8a6b7d';
+  const tabla=rows=>`<table style="width:100%;border-collapse:collapse;font-size:14px;margin:6px 0 14px">${rows.map(([k,v])=>`<tr><td style="padding:7px 8px;border-bottom:1px solid ${L};color:${M};width:40%;vertical-align:top">${k}</td><td style="padding:7px 8px;border-bottom:1px solid ${L};vertical-align:top">${v}</td></tr>`).join('')}</table>`;
+  const h=t=>`<h3 style="font-family:Arial,sans-serif;color:${R};font-size:16px;margin:18px 0 4px">${t}</h3>`;
+  const contacto=[pr.instagram?`<a href="${igLink(pr.instagram)}" style="color:${R};text-decoration:none">Instagram @${esc(pr.instagram.replace(/^@/,''))}</a>`:'',pr.whatsapp?`<a href="${waLink(pr.whatsapp)}" style="color:${R};text-decoration:none">WhatsApp ${esc(pr.whatsapp)}</a>`:'',pr.correo?esc(pr.correo):''].filter(Boolean).join(' &nbsp;·&nbsp; ');
+  let body=tabla([['Paciente',esc(p.nombre)],['Cédula',esc(p.cedula||'—')],['Edad',esc(p.edad||'—')],['Entidad',esc(p.entidad||'Particular')],['Patología / diagnóstico',esc(p.patologia||'—')]]);
+  if(kind==='valoracion'){
+    const base=(p.medidas||[]).filter(m=>num(p.medidasBase?.[m.mid])!==null);
+    if(base.length)body+=h('Mediciones iniciales')+tabla(base.map(m=>[esc(m.nombre),`<b>${esc(fmtV(m,num(p.medidasBase[m.mid])))}</b>`]));
+    const val=d.qv.filter(q=>p.valoracion?.[q.id]!==undefined);
+    if(val.length)body+=h('Valoración')+tabla(val.map(q=>[esc(q.texto),esc(p.valoracion[q.id])]));
+    if((p.valExtra||[]).length)body+=h('Datos adicionales')+tabla(p.valExtra.map(x=>[esc(x.label),esc(x.valor||'—')]));
+  }else{
+    body+=tabla([['Sesiones realizadas',`${d.ss.length} de ${p.sesionesTotales||'—'}${d.ss.length?` (${fmtCorto(d.ss[0].fecha)} a ${fmtCorto(d.ss[d.ss.length-1].fecha)})`:''}`]]);
+    const ms=d.meds.filter(x=>x.s.length);
+    if(ms.length)body+=h('Resultados medidos (inicial → actual)')+tabla(ms.map(x=>[esc(x.m.nombre),`<b>${esc(fmtV(x.m,x.a))} → ${esc(fmtV(x.m,x.b))}</b>${x.c?` <span style="color:${x.c.igual?M:x.c.mejora?'#23744f':'#c3304b'}">· ${x.c.igual?'sin cambio':(x.c.mejora?'mejoró':'empeoró')+' '+r1(Math.abs(x.c.d))+(x.m.unidad?' '+esc(x.m.unidad):'')+(x.c.pct!=null?` (${x.c.pct}%)`:'')}</span>`:''}`]));
+    if(d.notas.filter(n=>n.hecha).length)body+=h('Sesión por sesión')+tabla(d.notas.filter(n=>n.hecha).map(n=>[fmtCorto(n.fecha),esc(n.nota)]));
+    if(Object.keys(d.hizo).length)body+=h('Lo que se ha trabajado')+tabla(Object.entries(d.hizo).map(([k,v])=>[esc(k),v.map(esc).join('<br>')]));
+    if(narr)body+=h('Evolución y recomendaciones')+narr.split(/\n+/).filter(Boolean).map(x=>`<p style="margin:0 0 10px;line-height:1.55">${esc(x)}</p>`).join('');
+  }
+  return `<div style="font-family:Arial,Helvetica,sans-serif;color:${T};background:#ffffff;max-width:680px">
+   <div style="background:${Rs};padding:20px 22px;border-bottom:4px solid ${R}">
+    <div style="font-size:11px;letter-spacing:3px;color:${R};font-weight:bold">FISIOTERAPIA</div>
+    <div style="font-size:22px;font-weight:bold;margin-top:4px">${esc(pr.nombre)}</div>
+    <div style="font-size:13px;color:${M}">${esc(pr.titulo)}${pr.tp?' · T.P. '+esc(pr.tp):''}</div></div>
+   <div style="padding:18px 22px">
+    <div style="font-size:20px;font-weight:bold;margin-bottom:2px">${kind==='valoracion'?'Valoración fisioterapéutica':'Informe de avances'}</div>
+    <div style="font-size:12px;color:${M};margin-bottom:10px">${fmtFecha(kind==='valoracion'?(p.valoracionFecha||today()):today())}</div>
+    ${body}
+    <div style="margin-top:30px;font-size:14px"><div style="width:220px;border-top:1px solid ${T};padding-top:6px"><b>${esc(pr.nombre)}</b><br>${esc(pr.titulo)}${pr.tp?'<br>T.P. '+esc(pr.tp):''}</div></div></div>
+   ${contacto?`<div style="background:${Rs};padding:12px 22px;font-size:13px">${contacto}</div>`:''}</div>`;
+}
+// ---- PDF formal ----
+const pdfTxt=s=>String(s??'').replace(/→/g,'->').replace(/[‑–—]/g,'-').replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/·/g,'|').replace(/°/g,'°').replace(/[^\x00-\xFF]/g,'');
+const pdfNombre=(p,k)=>`${k==='valoracion'?'Valoracion_fisioterapeutica':'Informe_de_avances'}_${(p.nombre||'paciente').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_')}.pdf`;
+function pdfB64(p,kind,narr){
+  const {jsPDF}=window.jspdf; const doc=new jsPDF({unit:'mm',format:'a4'});
+  narr=narr??p.informe??'';
+  const pr=pro(proDe(p)), d=datosInforme(p), PW=210, M=16, ROSA=[214,69,127], SOFT=[255,227,238], INK=[59,36,51], GRIS=[138,107,125], LINEA=[244,220,230];
+  doc.setFillColor(...SOFT);doc.rect(0,0,PW,36,'F');doc.setFillColor(...ROSA);doc.rect(0,36,PW,1.6,'F');
+  doc.setTextColor(...ROSA);doc.setFont('helvetica','bold');doc.setFontSize(8);doc.text('F I S I O T E R A P I A',M,10);
+  doc.setTextColor(...INK);doc.setFontSize(15);doc.text(pdfTxt(pr.nombre),M,18);
+  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(...GRIS);doc.text(pdfTxt([pr.titulo,pr.tp?'T.P. '+pr.tp:''].filter(Boolean).join('   |   ')),M,24);
+  let cx=M;doc.setTextColor(...ROSA);doc.setFontSize(9);
+  [[pr.instagram&&'Instagram @'+pr.instagram.replace(/^@/,''),pr.instagram&&igLink(pr.instagram)],[pr.whatsapp&&'WhatsApp '+pr.whatsapp,pr.whatsapp&&waLink(pr.whatsapp)],[pr.correo,pr.correo&&'mailto:'+pr.correo]].forEach(([t,u])=>{if(!t)return;doc.textWithLink(pdfTxt(t),cx,30.5,{url:u});cx+=doc.getTextWidth(pdfTxt(t))+8});
+  let y=48;
+  doc.setTextColor(...INK);doc.setFont('helvetica','bold');doc.setFontSize(14);doc.text(kind==='valoracion'?'VALORACIÓN FISIOTERAPÉUTICA':'INFORME DE AVANCES EN FISIOTERAPIA',M,y);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...GRIS);doc.text(pdfTxt('Fecha: '+fmtCorto(kind==='valoracion'?(p.valoracionFecha||today()):today())),PW-M,y,{align:'right'});
+  const tabla=(titulo,rows)=>{rows=rows.filter(r=>r[1]!==undefined&&r[1]!=='');if(!rows.length)return;
+    doc.autoTable({startY:y+4,head:[[{content:pdfTxt(titulo),colSpan:2}]],body:rows.map(r=>r.map(pdfTxt)),theme:'grid',margin:{left:M,right:M,bottom:20},
+     styles:{font:'helvetica',fontSize:9.5,cellPadding:2.4,textColor:INK,lineColor:LINEA,lineWidth:.2,valign:'top'},headStyles:{fillColor:ROSA,textColor:255,fontStyle:'bold',fontSize:10},
+     columnStyles:{0:{cellWidth:62,textColor:GRIS,fontStyle:'bold'}}});y=doc.lastAutoTable.finalY+2};
+  tabla('Datos de identificación',[['Nombre',p.nombre],['Documento',p.cedula||'-'],['Edad',p.edad?p.edad+' años':'-'],['Teléfono',p.telefono||'-'],['Correo',p.correo||'-'],['Entidad',p.entidad||'Particular'],['Diagnóstico / patología',p.patologia||'-']]);
+  if(kind==='valoracion'){
+    const qv=d.qv.filter(q=>p.valoracion?.[q.id]!==undefined);
+    tabla('Evaluación',qv.map(q=>[q.texto,p.valoracion[q.id]]));
+    tabla('Mediciones iniciales',(p.medidas||[]).filter(m=>num(p.medidasBase?.[m.mid])!==null).map(m=>[m.nombre,fmtV(m,num(p.medidasBase[m.mid]))+(m.tipo==='eva'?' / 10':m.tipo==='daniels'?' / 5':'')]));
+    tabla('Datos adicionales',(p.valExtra||[]).map(x=>[x.label,x.valor||'-']));
+  }else{
+    tabla('Tratamiento',[['Sesiones realizadas',`${d.ss.length} de ${p.sesionesTotales||'-'}`],['Periodo',d.ss.length?`${fmtCorto(d.ss[0].fecha)} a ${fmtCorto(d.ss[d.ss.length-1].fecha)}`:'-']]);
+    tabla('Resultados medidos (inicial -> actual)',d.meds.filter(x=>x.s.length).map(x=>[x.m.nombre,`${fmtV(x.m,x.a)} -> ${fmtV(x.m,x.b)}${x.c?(x.c.igual?'  (sin cambio)':`  (${x.c.mejora?'mejoró':'empeoró'} ${r1(Math.abs(x.c.d))}${x.m.unidad?' '+x.m.unidad:''}${x.c.pct!=null?', '+x.c.pct+'%':''})`):''}`]));
+    tabla('Sesión por sesión',d.notas.filter(n=>n.hecha).map(n=>[fmtCorto(n.fecha),n.nota]));
+    tabla('Intervenciones realizadas',Object.entries(d.hizo).map(([k,v])=>[k,v.join('\n')]));
+    if(narr){if(y>250){doc.addPage();y=20}
+      doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...ROSA);doc.text('Evolución y recomendaciones',M,y+8);y+=13;
+      doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...INK);
+      doc.splitTextToSize(pdfTxt(narr),PW-2*M).forEach(l=>{if(y>272){doc.addPage();y=20}doc.text(l,M,y);y+=5})}
+  }
+  if(y>245){doc.addPage();y=20}
+  y+=24;doc.setDrawColor(...INK);doc.setLineWidth(.3);doc.line(M,y,M+75,y);
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...INK);doc.text(pdfTxt(pr.nombre),M,y+5);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...GRIS);doc.text(pdfTxt(pr.titulo||''),M,y+10);if(pr.tp)doc.text('T.P. '+pdfTxt(pr.tp),M,y+15);
+  const n=doc.getNumberOfPages();
+  for(let i=1;i<=n;i++){doc.setPage(i);doc.setDrawColor(...LINEA);doc.line(M,283,PW-M,283);doc.setFontSize(7.5);doc.setTextColor(...GRIS);
+    doc.text('Documento de historia clínica de fisioterapia. Información confidencial (Ley 1581 de 2012).',M,288);doc.text(`Página ${i} de ${n}`,PW-M,288,{align:'right'})}
+  return doc.output('datauristring').split(',')[1];
+}
+async function enviarPDF(p,kind,to){
+  const pr=pro(proDe(p));
+  try{const b64=pdfB64(p,kind);
+    await enviarCorreo({to,subject:`${kind==='valoracion'?'Tu valoración fisioterapéutica':'Tu informe de avances'} · ${pr.nombre}`,
+     htmlBody:`<div style="font-family:Arial,sans-serif;color:#3b2433;max-width:560px"><p>Hola ${esc(p.nombre.split(' ')[0])},</p><p>Adjunto encontrarás ${kind==='valoracion'?'tu valoración fisioterapéutica':'tu informe de avances'} en PDF.</p><p>Cualquier duda, escríbeme.</p><p style="margin-top:18px"><b>${esc(pr.nombre)}</b><br>${esc(pr.titulo)}${pr.tp?'<br>T.P. '+esc(pr.tp):''}${pr.instagram?`<br><a href="${igLink(pr.instagram)}" style="color:#d6457f">Instagram @${esc(pr.instagram)}</a>`:''}${pr.whatsapp?`<br><a href="${waLink(pr.whatsapp)}" style="color:#d6457f">WhatsApp ${esc(pr.whatsapp)}</a>`:''}</p></div>`,
+     attach:{content:b64,filename:pdfNombre(p,kind),mimeType:'application/pdf'}});
+    await patch('pacientes',p.id,{[kind==='valoracion'?'valPdfEnviado':'infPdfEnviado']:today()});
+    toast('PDF enviado a '+to);
+  }catch(e){toast(e.message?.startsWith('sin_')||e.code?errCorreo(e):'No se pudo crear o enviar el PDF.',4200)}
+}
+function docTexto(p,kind){
+  const pr=pro(proDe(p)), d=datosInforme(p);
+  const meds=kind==='valoracion'?(p.medidas||[]).filter(m=>num(p.medidasBase?.[m.mid])!==null).map(m=>`• ${m.nombre}: ${fmtV(m,num(p.medidasBase[m.mid]))}`)
+    :d.meds.filter(x=>x.s.length).map(x=>`• ${x.m.nombre}: ${fmtV(x.m,x.a)} → ${fmtV(x.m,x.b)}${x.c&&!x.c.igual?(x.c.mejora?' (mejoró)':' (empeoró)'):''}`);
+  return `Hola ${p.nombre.split(' ')[0]}, te comparto ${kind==='valoracion'?'el resumen de tu valoración':'tus avances en fisioterapia'}${kind==='informe'?` (${d.ss.length} sesiones)`:''}:\n${meds.join('\n')||'—'}\n\n${p.correo?'Te envié el documento completo a tu correo.\n\n':''}${pr.nombre}\n${pr.titulo}${pr.instagram?'\nInstagram: '+igLink(pr.instagram):''}`;
+}
+function doc(id,kind){
+  const p=S.pacientes[id];
+  openSheet((kind==='valoracion'?'Valoración · ':'Informe · ')+p.nombre,`<div class="stack">
+   <div class="doc" id="docView">${docHTML(p,kind,p.informe||'')}</div>
+   ${kind==='informe'?`<div><label for="iNarr">Evolución y recomendaciones (editable)</label><textarea id="iNarr" style="min-height:160px" placeholder="Escribe aquí o pide a Claude que lo redacte con los datos de las sesiones">${esc(p.informe||'')}</textarea></div>
+   <div class="row">${sample?`<button data-act="redactar" data-id="${id}">Redactar con Claude</button>`:''}<button data-act="guardarInf" data-id="${id}">Guardar texto</button></div>`:''}
+   <div class="card stack"><h3>Enviar</h3>
+    <div class="row"><button class="primary" data-act="docEnviar" data-id="${id}" data-k="${kind}" data-a="paciente">Compartir PDF (WhatsApp o correo)</button>
+    ${p.telefono?`<a class="btn wa" href="${waLink(p.telefono,docTexto(p,kind))}" target="_blank" rel="noopener">Enviar resumen por WhatsApp</a>`:''}
+<button data-act="docPdf" data-id="${id}" data-k="${kind}">Descargar PDF</button></div>
+    <p class="small muted" style="margin:0">Al compartir eliges WhatsApp, Gmail u otra app. Si tu celular no permite compartir archivos, el PDF se descarga para que lo adjuntes.</p></div>
+  </div>`);
+}
+
+// ===================== Acciones =====================
+const ACT={
+ cerrar:closeSheet, ficha:d=>ficha(d.id), nuevo:d=>fPaciente(null,d.t), editPac:d=>fPaciente(S.pacientes[d.id]),
+ yo:d=>{S.yo=d.k;try{localStorage.setItem('fisio_yo',d.k)}catch(e){}render()},
+ tipo:d=>{S.tipo=d.t;render()}, gFiltro:d=>{S.gFiltro=d.k;render()},
+ pPro:(d,el)=>{el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));el.classList.add('on')},
+ modPick:(d,el)=>{const was=el.classList.contains('on');el.parentNode.querySelectorAll('button').forEach(b=>b.classList.remove('on'));if(!was)el.classList.add('on')},
+ 'dia-sem':(d,el)=>el.classList.toggle('on'),
+ dia:d=>{S.calSel=d.f;render()},
+ mes:d=>{const m=parse(S.calMonth);m.setMonth(m.getMonth()+Number(d.d));S.calMonth=ymd(m);render()},
+ pick:(d,el)=>{const box=el.parentNode;box.querySelectorAll('button').forEach(b=>{b.classList.remove('on');b.style.background=''});el.classList.add('on');if(box.classList.contains('eva'))el.style.background=EVA_COL(+d.v)},
+ usar:d=>{const t=document.querySelector(`[data-qrow="${d.q}"] textarea`);if(t)t.value=t.value?(t.value+'\n'+d.v):d.v},
+ async guardarPac(){
+  const f=$('#fPac'), id=f.dataset.id||uid('p'), nuevo=!f.dataset.id, g=f.dataset.tipo==='gastro';
+  const nom=$('#pNom').value.trim(); if(!nom){toast('Escribe el nombre del paciente');return}
+  const base=nuevo?{}:S.pacientes[id];
+  const p=Object.assign({},base,{tipo:g?'gastro':'particular',nombre:nom,cedula:$('#pCed').value.trim(),telefono:$('#pTel').value.trim(),correo:$('#pCor').value.trim(),edad:$('#pEdad').value.trim(),
+    patologia:$('#pPat').value.trim(),notas:$('#pNotas').value.trim()});
+  if(g){p.profesional='diana';p.sesionesTotales=2;p.entidad='Gastro Quirúrgica'}
+  else{p.profesional=document.querySelector('#pPro button.on')?.dataset.k||'diana';p.entidad=$('#pEnt').value.trim();p.sesionesTotales=Number($('#pN').value)||0;p.costo=Number(String($('#pCosto').value).replace(/\D/g,''))||cfg().costo}
+  if(nuevo){
+   p.estado='activo';p.creado=new Date().toISOString();
+   const mod=leerMod('pMod');
+   if(g){await save('pacientes',id,p);await save('citas',uid('c'),{pacienteId:id,fecha:$('#pIni').value||today(),hora:$('#pHora').value,estado:'pendiente',etapa:'pre',modalidad:mod});toast(`${nom} registrado. Pre agendado.`)}
+   else{
+    const dias=[...document.querySelectorAll('#pDias button.on')].map(b=>Number(b.dataset.d));
+    if(!dias.length){toast('Elige al menos un día de atención');return}
+    Object.assign(p,{dias,hora:$('#pHora').value,fechaInicio:$('#pIni').value||today(),modalidad:mod});
+    await save('pacientes',id,p);
+    for(const fe of planCitas(p.fechaInicio,dias,p.sesionesTotales))await save('citas',uid('c'),{pacienteId:id,fecha:fe,hora:p.hora,estado:'pendiente',modalidad:mod});
+    toast(`${nom} registrado con ${p.sesionesTotales} citas`);
+   }
+  } else {await save('pacientes',id,p);toast('Cambios guardados')}
+  S.tipo=p.tipo; ficha(id); render();
+ },
+ agendarPost:d=>ACT.agendarEtapa({id:d.id,e:'post'}),
+ agendarEtapa:d=>{const p=S.pacientes[d.id];
+  openSheet(`Agendar ${d.e==='post'?'post':'pre'}‑quirúrgica · ${p.nombre}`,`<form class="stack">
+   <div class="grid2"><div><label for="aF">Fecha</label><input id="aF" type="date" value="${today()}"></div><div><label for="aH">Hora</label><input id="aH" type="time" value="08:00"></div></div>
+   <div><label>Modalidad</label>${modSel('aMod','')}</div>
+   <div class="row"><button class="lila" data-act="guardarEtapa" data-id="${d.id}" data-e="${d.e}">Agendar</button></div></form>`)},
+ async guardarEtapa(d){await save('citas',uid('c'),{pacienteId:d.id,fecha:$('#aF').value||today(),hora:$('#aH').value,estado:'pendiente',etapa:d.e,modalidad:leerMod('aMod')});toast('Agendado');ficha(d.id)},
+ async cobrado(d){const p=S.pacientes[d.id];await patch('pacientes',d.id,{cobrado:!p.cobrado,cobradoFecha:!p.cobrado?today():''});render()},
+ async gExcel(d){
+  const ps=pacientesDe('gastro');if(!ps.length){toast('No hay pacientes de Gastro Quirúrgica');return}
+  const b64=gastroB64(ps), fn=`Gastro_Quirurgica_${today()}.xlsx`;
+  if(d.modo==='bajar')return bajar(fn,b64,XMIME);
+  try{await enviarCorreo({subject:`Registro Gastro Quirúrgica · ${fmtCorto(today())}`,body:`Registro de pacientes de Gastro Quirúrgica al ${fmtFecha(today())}. Excel adjunto.`,attach:{content:b64,filename:fn,mimeType:XMIME}});}
+  catch(e){toast(errCorreo(e),4000)}
+ },
+ valoracion:d=>valoracion(d.id), sesion:d=>sesion(d.cita), doc:d=>doc(d.id,d.k),
+ verSesion:d=>{const s=list(S.sesiones).find(x=>x.citaId===d.cita);if(!s)return;const p=S.pacientes[s.pacienteId];
+   const mn=Object.fromEntries((p.medidas||[]).map(m=>[m.mid,m]));
+   openSheet('Sesión del '+fmtCorto(s.fecha),`<div class="card"><table style="width:100%;border-collapse:collapse" class="small">${[['Modalidad',MOD[s.modalidad]||'—']].concat(Object.entries(s.medidas||{}).map(([k,v])=>[mn[k]?.nombre||'Medida',v+' '+(mn[k]?.unidad||'')])).concat(Object.entries(s.respuestas||{}).map(([k,v])=>[S.preguntas[k]?.texto||k,v])).concat(p.tipo==='gastro'?[]:[['Costo',money(s.costo)],['Excel',s.excelEnviado?'Enviado':'Pendiente']]).map(([k,v])=>`<tr><td class="muted" style="padding:6px 0;width:42%;vertical-align:top">${esc(k)}</td><td style="padding:6px 0">${esc(v)}</td></tr>`).join('')}</table></div>
+   <div class="row" style="margin-top:12px">${p.tipo==='gastro'?'':`<button data-act="reenviar" data-id="${s.id}">Reenviar Excel</button>`}<button data-act="ficha" data-id="${p.id}">Volver a la ficha</button></div>`)},
+ repetir:()=>{const f=$('#fForm');const prev=sesionesDe(f.dataset.pid).slice(-1)[0];if(!prev)return;
+   Object.entries(prev.respuestas||{}).forEach(([k,v])=>{const el=f.querySelector(`[data-qrow="${k}"] [data-q]:not(.chip)`);if(!el)return;
+     if(el.matches('input,textarea'))el.value=v;else el.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===String(v)))});toast('Copiado. Las mediciones las tomas de nuevo.')},
+ async guardarVal(){
+  const f=$('#fForm'), r=leer(f), id=f.dataset.pid;
+  const antes=new Set((S.pacientes[id].medidas||[]).map(m=>m.catId+'|'+m.detalle));
+  const extra=[];
+  for(const el of f.querySelectorAll('[data-extra]')){const label=el.querySelector('[data-ex=label]').value.trim(),valor=el.querySelector('[data-ex=valor]').value.trim();if(!label)continue;
+    if(el.querySelector('[data-ex=banco]').checked){const qid=uid('q');await save('preguntas',qid,{texto:label,tipo:'larga',fase:'valoracion',opciones:'',para:'todos',patologia:'',orden:80,usos:1,activa:true});if(valor)r[qid]=valor}
+    else extra.push({label,valor})}
+  const enviar=$('#vEnviar')?.checked;
+  await patch('pacientes',id,{valoracion:r,valoracionFecha:S.pacientes[id].valoracionFecha||today(),valExtra:extra,valOcultas:[...W.ocultas],medidas:W.medidas,medidasBase:leerMed(f)});
+  contarUsos(Object.keys(r)); usosMed(W.medidas.filter(m=>!antes.has(m.catId+'|'+m.detalle)));
+  doc(id,'valoracion');
+  toast('Valoración guardada. Toca “Compartir PDF” para entregársela al paciente.',3800);
+ },
+ async guardarSes(){
+  const f=$('#fForm'), r=leer(f), pid=f.dataset.pid, cid=f.dataset.cita, p=S.pacientes[pid], c=S.citas[cid], g=p.tipo==='gastro';
+  const sid=uid('s'), mod=leerMod('sMod');
+  const s={pacienteId:pid,citaId:cid,fecha:$('#sFecha').value||today(),hora:$('#sHora').value,modalidad:mod,respuestas:r,medidas:leerMed(f),creado:new Date().toISOString()};
+  if(g){s.etapa=c.etapa}else{s.costo=p.costo||cfg().costo;s.excelEnviado=false}
+  const nuevas=W.medidas.filter(m=>!(p.medidas||[]).some(x=>x.mid===m.mid));
+  if(nuevas.length){await patch('pacientes',pid,{medidas:W.medidas});usosMed(nuevas)}
+  await save('sesiones',sid,s);
+  s.nota=$('#sNota').value.trim();
+  await patch('citas',cid,{estado:'hecha',fecha:s.fecha,hora:s.hora,modalidad:mod,nota:s.nota});
+  contarUsos(Object.keys(r));
+  ficha(pid);
+  if(g){toast(c.etapa==='post'?'Post registrado. Paciente completo, listo para cobrar.':'Pre registrado. El post queda por agendar.',3600);return}
+  toast('Sesión guardada');
+  const rest=citasDe(pid).filter(x=>x.estado==='pendiente').length;
+  await enviarExcelSesion(Object.assign({id:sid},s));
+  if(!rest&&p.estado!=='alta')setTimeout(()=>toast('Fue la última sesión programada. Puedes generar el informe.',4000),2800);
+ },
+ async reenviar(d){const s=S.sesiones[d.id];if(s)await enviarExcelSesion(s);render()},
+ async cancelarCita(d){await patch('citas',d.id,{estado:'cancelada'});const pid=S.citas[d.id].pacienteId;toast('Marcada como no asistió');ficha(pid)},
+ moverCita:d=>{const c=S.citas[d.id];openSheet('Mover cita',`<form class="stack"><div class="grid2"><div><label for="mF">Nueva fecha</label><input id="mF" type="date" value="${c.fecha}"></div><div><label for="mH">Hora</label><input id="mH" type="time" value="${c.hora}"></div></div>
+   <div><label>Modalidad</label>${modSel('mMod',c.modalidad||'')}</div>
+   <div class="row"><button class="primary" data-act="guardarMov" data-id="${d.id}">Guardar</button><button type="button" class="ghost danger" data-act="borrarCita" data-id="${d.id}">Eliminar cita</button></div></form>`)},
+ async guardarMov(d){await patch('citas',d.id,{fecha:$('#mF').value,hora:$('#mH').value,modalidad:leerMod('mMod')});toast('Cita actualizada');ficha(S.citas[d.id].pacienteId)},
+ async borrarCita(d){const pid=S.citas[d.id].pacienteId;await remove('citas',d.id);ficha(pid)},
+ async addCita(d){const p=S.pacientes[d.id];const last=citasDe(d.id).slice(-1)[0];const f=last?addDays(last.fecha,1):today();const cid=uid('c');
+   await save('citas',cid,{pacienteId:d.id,fecha:f,hora:p.hora||'08:00',estado:'pendiente',modalidad:p.modalidad||''});await patch('pacientes',d.id,{sesionesTotales:(p.sesionesTotales||0)+1});ACT.moverCita({id:cid})},
+ async alta(d){await patch('pacientes',d.id,{estado:'alta',altaFecha:today()});toast('Paciente dado de alta');ficha(d.id)},
+ async reactivar(d){await patch('pacientes',d.id,{estado:'activo'});ficha(d.id)},
+ borrarPac:d=>{openSheet('Eliminar paciente',`<div class="stack"><p>Se borran <b>${esc(S.pacientes[d.id].nombre)}</b>, sus citas y sus sesiones. No se puede deshacer.</p><div class="row"><button class="primary" style="background:var(--bad);border-color:var(--bad)" data-act="borrarSi" data-id="${d.id}">Sí, eliminar</button><button data-act="ficha" data-id="${d.id}">Cancelar</button></div></div>`)},
+ async borrarSi(d){for(const c of citasDe(d.id))await remove('citas',c.id);for(const s of sesionesDe(d.id))await remove('sesiones',s.id);await remove('pacientes',d.id);closeSheet();toast('Paciente eliminado')},
+ async addQ(d){
+  const t=$('#nqTexto').value.trim();if(!t){toast('Escribe la pregunta');return}
+  const p=S.pacientes[d.pid], alc=$('#nqAlc').value, qid=uid('q');
+  const q={texto:t,tipo:$('#nqTipo').value,fase:d.fase,opciones:$('#nqOps').value.trim(),para:alc==='tipo'?p.tipo:'todos',patologia:alc==='pat'?p.patologia:'',orden:90,usos:0,activa:true};
+  await save('preguntas',qid,q);
+  $('#qs').insertAdjacentHTML('beforeend',campo(Object.assign({id:qid},q),''));
+  $('#nqTexto').value='';$('#nqOps').value='';toast('Pregunta agregada al banco');
+ },
+ async sugerirQ(d,el){
+  const p=S.pacientes[d.pid], ya=preguntasPara(d.fase,p).map(q=>q.texto);
+  el.disabled=true;el.textContent='Pensando…';
+  try{
+   const out=await sample.json(`Eres fisioterapeuta clínico en Colombia. Sugiere 5 preguntas cortas y útiles para ${d.fase==='valoracion'?'la valoración inicial':'registrar al final de cada sesión'} de un paciente ${p.tipo==='gastro'?'de cirugía gastrointestinal (sesión pre o post quirúrgica, movilidad temprana)':'particular'} con: "${p.patologia||'sin diagnóstico'}". No repitas estas: ${JSON.stringify(ya)}. Responde SOLO un arreglo JSON de objetos {"texto": string, "tipo": "eva"|"daniels"|"texto"|"larga"|"numero"|"sino"|"opciones", "opciones": string}. En español.`,{modelTier:'quick'});
+   const arr=Array.isArray(out)?out:(out?.preguntas||[]);
+   W.sugQ=arr;
+   $('#sugQ').innerHTML=arr.slice(0,6).map((q,i)=>`<button type="button" class="chip" data-act="tomarSug" data-i="${i}">+ ${esc(q.texto)}</button>`).join('')||'<span class="small muted">Sin sugerencias.</span>';
+  }catch(e){toast(e.code==='not_granted'?'No diste permiso para usar Claude en la página.':'No se pudieron traer sugerencias.')}
+  el.disabled=false;el.textContent='Sugerir preguntas con Claude';
+ },
+ tomarSug:(d,el)=>{const q=W.sugQ?.[d.i];if(!q)return;$('#nqTexto').value=q.texto;if(TIPOS[q.tipo])$('#nqTipo').value=q.tipo;$('#nqOps').value=q.opciones||'';el.remove();$('#nqTexto').scrollIntoView({block:'center'})},
+ editq:d=>{const q=d.id?S.preguntas[d.id]:{fase:'sesion',tipo:'texto',para:'todos',orden:50,activa:true};
+  openSheet(d.id?'Editar pregunta':'Nueva pregunta',`<form class="stack" id="fQ" data-id="${d.id||''}">
+   <div><label for="qT">Pregunta</label><input id="qT" value="${esc(q.texto)}"></div>
+   <div class="grid2"><div><label for="qF">Cuándo se pregunta</label><select id="qF"><option value="valoracion" ${q.fase==='valoracion'?'selected':''}>Valoración inicial</option><option value="sesion" ${q.fase==='sesion'?'selected':''}>En cada sesión</option></select></div>
+   <div><label for="qTi">Tipo de respuesta</label><select id="qTi">${Object.entries(TIPOS).map(([k,v])=>`<option value="${k}" ${q.tipo===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+   <div><label for="qO">Opciones (separadas por coma)</label><input id="qO" value="${esc(q.opciones)}"></div>
+   <div class="grid2"><div><label for="qP">Aplica a</label><select id="qP"><option value="todos">Todos</option><option value="particular" ${q.para==='particular'?'selected':''}>Solo Particulares</option><option value="gastro" ${q.para==='gastro'?'selected':''}>Solo Gastro Quirúrgica</option></select></div>
+   <div><label for="qPat">Solo si la patología contiene</label><input id="qPat" value="${esc(q.patologia)}" placeholder="vacío = todas"></div></div>
+   <div><label for="qOr">Orden (1 = primero)</label><input id="qOr" inputmode="numeric" value="${q.orden??50}"></div>
+   <div class="row"><button class="primary" data-act="guardarQ">Guardar</button>${d.id?`<button type="button" class="ghost danger" data-act="borrarQ" data-id="${d.id}">Eliminar pregunta</button>`:''}</div></form>`)},
+ async guardarQ(){const f=$('#fQ');const id=f.dataset.id||uid('q');const t=$('#qT').value.trim();if(!t){toast('Escribe la pregunta');return}
+  await save('preguntas',id,Object.assign({},S.preguntas[id]||{usos:0,activa:true},{texto:t,fase:$('#qF').value,tipo:$('#qTi').value,opciones:$('#qO').value.trim(),para:$('#qP').value,patologia:$('#qPat').value.trim(),orden:Number($('#qOr').value)||50}));
+  toast('Pregunta guardada');closeSheet()},
+ async borrarQ(d){await remove('preguntas',d.id);closeSheet()},
+ async guardarCfg(){
+  const c=cfg();const pros={daniel:c.profesionales.daniel};['diana'].forEach(k=>pros[k]={nombre:$('#'+k+'Nom').value.trim()||PRO_DEF[k].nombre,titulo:$('#'+k+'Tit').value.trim(),tp:$('#'+k+'Tp').value.trim(),whatsapp:$('#'+k+'Wa').value.trim(),instagram:$('#'+k+'Ig').value.trim().replace(/^@/,''),correo:$('#'+k+'Co').value.trim()});
+  await save('config','main',Object.assign({},S.config.main||{},{correo:$('#cCorreo').value.trim(),telefono:$('#cTel').value.trim(),costo:Number(String($('#cCosto').value).replace(/\D/g,''))||55000,costoGastro:Number(String($('#cGastro').value).replace(/\D/g,''))||55000,profesionales:pros}));
+  toast('Ajustes guardados');render()},
+ async reporte(d){
+  const a=$('#rDesde').value,b=$('#rHasta').value;
+  const ss=list(S.sesiones).filter(s=>s.fecha>=a&&s.fecha<=b&&S.pacientes[s.pacienteId]?.tipo!=='gastro').sort((x,y)=>(x.fecha+x.hora).localeCompare(y.fecha+y.hora));
+  if(!ss.length){toast('No hay atenciones particulares en ese rango');return}
+  const b64=excelB64(ss.map(filaDe),'Atenciones'), fn=`Atenciones_${a}_a_${b}.xlsx`;
+  if(d.modo==='bajar')return bajar(fn,b64,XMIME);
+  try{await enviarCorreo({subject:`Atenciones particulares ${fmtCorto(a)} a ${fmtCorto(b)} (${ss.length})`,body:`${ss.length} atenciones. Total ${money(ss.reduce((x,s)=>x+(+s.costo||0),0))}. Excel adjunto.`,attach:{content:b64,filename:fn,mimeType:XMIME}});}
+  catch(e){toast(errCorreo(e),4000)}
+ },
+ async redactar(d,el){
+  const p=S.pacientes[d.id], x=datosInforme(p);
+  const val=x.qv.filter(q=>p.valoracion?.[q.id]!==undefined).map(q=>`${q.texto}: ${p.valoracion[q.id]}`).join('\n');
+  const mn=Object.fromEntries((p.medidas||[]).map(m=>[m.mid,m]));
+  const ses=x.ss.map((s,i)=>`Sesión ${i+1} (${s.fecha}${s.modalidad?', '+s.modalidad:''}): `+Object.entries(s.medidas||{}).map(([k,v])=>`${mn[k]?.nombre||k}: ${v} ${mn[k]?.unidad||''}`).concat(Object.entries(s.respuestas||{}).map(([k,v])=>`${S.preguntas[k]?.texto||k}: ${v}`)).join('; ')).join('\n');
+  const medTxt=x.meds.filter(y=>y.s.length).map(y=>`${y.m.nombre}: ${fmtV(y.m,y.a)} → ${fmtV(y.m,y.b)} (${y.m.mejor==='bajo'?'mejora si baja':'mejora si sube'})`).join('\n');
+  el.disabled=true;el.textContent='Redactando…';const ta=$('#iNarr');
+  try{await sample(`Eres fisioterapeuta en Colombia. Redacta en español, en 2 a 4 párrafos breves y en tono clínico claro y cercano, la sección "Evolución y recomendaciones" de un informe de avances que se enviará al paciente. Incluye: objetivo del tratamiento, intervenciones realizadas, evolución con datos concretos de las medidas registradas (inicial y actual), estado actual y recomendaciones de plan casero. No inventes datos; si falta algo, no lo menciones. Sin títulos ni viñetas.\n\nPaciente: ${p.nombre}, ${p.edad?p.edad+' años, ':''}patología: ${p.patologia||'—'}.\nSesiones realizadas: ${x.ss.length} de ${p.sesionesTotales}.\n\nMedidas (inicial → actual):\n${medTxt||'—'}\n\nValoración inicial:\n${val||'—'}\n\nSesiones:\n${ses||'—'}\n\nNotas por sesión:\n${x.notas.filter(n=>n.hecha).map(n=>n.fecha+': '+n.nota).join('\n')||'—'}`,
+     {onText:({text})=>{ta.value=text}});
+  }catch(e){toast(e.code==='not_granted'?'No diste permiso para usar Claude en la página.':'No se pudo redactar.')}
+  el.disabled=false;el.textContent='Redactar con Claude';
+ },
+ async guardarInf(d){await patch('pacientes',d.id,{informe:$('#iNarr').value});$('#docView').innerHTML=docHTML(S.pacientes[d.id],'informe',$('#iNarr').value);toast('Texto guardado')},
+ async docEnviar(d,el){
+  const p=S.pacientes[d.id];const narr=$('#iNarr')?.value??p.informe??'';
+  if(d.k==='informe')await patch('pacientes',d.id,{informe:narr});
+  const to=d.a==='paciente'?p.correo:cfg().correo, pr=pro(proDe(p));
+  el.disabled=true;await enviarPDF(S.pacientes[d.id],d.k,to);el.disabled=false;
+ },
+ docWord(d){const p=S.pacientes[d.id];const h=docHTML(p,d.k,$('#iNarr')?.value??p.informe??'');
+  const html=`<html><head><meta charset="utf-8"></head><body style="margin:0">${h}</body></html>`;
+  bajar(`${d.k==='valoracion'?'Valoracion':'Informe'}_${p.nombre.replace(/\s+/g,'_')}.doc`,btoa(unescape(encodeURIComponent(html))),'application/msword')}
+};
+Object.assign(ACT,{
+ async copiarLink(){const u=cfg().formUrl;try{await navigator.clipboard.writeText(u);toast('Enlace copiado')}catch(e){toast('Selecciona el enlace y cópialo')}},
+ async bajarQR(){const cv=$('#qr canvas');if(!cv)return;const b64=cv.toDataURL('image/png').split(',')[1];bajar('QR_valoracion_fisioterapia.png',b64,'image/png')},
+ async addPros(){const n=$('#prNom').value.trim();if(!n){toast('Escribe el nombre');return}
+  await save('prospectos',uid('x'),{nombre:n,whatsapp:$('#prWa').value.trim(),motivo:$('#prMot').value.trim(),prioridad:$('#prPri').value,estado:'nuevo',fecha:today(),detalle:$('#prPegar').value.trim()});
+  document.activeElement?.blur();render();toast('Prospecto guardado')},
+ async borrarPros(d){await remove('prospectos',d.id);render()},
+ prosPaciente(d){const x=S.prospectos[d.id];fPaciente(null,'particular');$('#pNom').value=x.nombre||'';$('#pTel').value=x.whatsapp||'';$('#pPat').value=x.motivo||'';patch('prospectos',d.id,{estado:'agendado'})},
+ async prosExcel(d){const ps=list(S.prospectos).sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||''));if(!ps.length){toast('Aún no hay prospectos');return}
+  const data=[['Fecha','Nombre','WhatsApp','Motivo','Interés','Estado','Respuestas']].concat(ps.map(p=>[fmtCorto(p.fecha),p.nombre,p.whatsapp||'',p.motivo||'',PRIO[p.prioridad]?.[0]||'',PEST[p.estado]||'',p.detalle||'']));
+  const b64=hojaB64(data,'Prospectos',[11,26,14,26,16,12,60],[]), fn=`Prospectos_${today()}.xlsx`;
+  if(d.modo==='bajar')return bajar(fn,b64,XMIME);
+  try{await enviarCorreo({subject:`Prospectos de fisioterapia · ${fmtCorto(today())} (${ps.length})`,body:`${ps.length} prospectos registrados. Excel adjunto.`,attach:{content:b64,filename:fn,mimeType:XMIME}});}catch(e){toast(errCorreo(e),4000)}}
+});
+Object.assign(ACT,{
+ precio:d=>{$('#pCosto').value=d.v},
+ quitarQ:d=>{W.ocultas.add(d.q);document.querySelector(`[data-qrow="${d.q}"]`)?.remove();$('#quitadas').innerHTML=quitBox(preguntasPara('valoracion',S.pacientes[$('#fForm').dataset.pid]).filter(q=>W.ocultas.has(q.id)))},
+ volverQ:d=>{W.ocultas.delete(d.q);const p=S.pacientes[$('#fForm').dataset.pid];$('#qs').insertAdjacentHTML('beforeend',campo(S.preguntas[d.q],p.valoracion?.[d.q],true));$('#quitadas').innerHTML=quitBox(preguntasPara('valoracion',p).filter(q=>W.ocultas.has(q.id)))},
+ addExtra:()=>{$('#extras').insertAdjacentHTML('beforeend',extraRow());$('#extras').lastElementChild.querySelector('input').focus()},
+ quitarExtra:d=>document.querySelector(`[data-extra="${d.k}"]`)?.remove(),
+ async docPdf(d){const p=S.pacientes[d.id];if(d.k==='informe')await patch('pacientes',d.id,{informe:$('#iNarr').value});
+  try{bajar(pdfNombre(p,d.k),pdfB64(S.pacientes[d.id],d.k),'application/pdf')}catch(e){toast('No se pudo crear el PDF.')}}
+});
+async function usosMed(ms){for(const m of ms){const c=S.medidas[m.catId];if(c)await patch('medidas',c.id,{usos:(c.usos||0)+1})}}
+Object.assign(ACT,{
+ addMed:d=>{const c=S.medidas[d.cat];if(!c)return;
+  if(c.detalle){$('#medDet').innerHTML=`<div class="card stack"><label for="mdIn">${esc(c.nombre)}: ${esc(c.detalle)}</label><div class="row" style="flex-wrap:nowrap"><input id="mdIn" placeholder="${esc(c.ejemplo||'')}"><button type="button" class="primary" data-act="addMedDet" data-cat="${c.id}">Agregar</button></div></div>`;$('#mdIn').focus()}
+  else pushMed(fromCat(c,''))},
+ addMedDet:d=>{const v=$('#mdIn').value.trim();if(!v){toast('Escribe el detalle');return}pushMed(fromCat(S.medidas[d.cat],v));$('#medDet').innerHTML=''},
+ addMedSug:(d,el)=>{const m=W.sug[d.i];if(m){pushMed(m);el.remove()}},
+ quitarMed:d=>{W.medidas=W.medidas.filter(x=>x.mid!==d.mid);document.querySelector(`[data-mrow="${d.mid}"]`)?.remove()},
+ async crearMed(){const n=$('#nmNom').value.trim();if(!n){toast('Escribe el nombre de la medida');return}
+  const id=uid('k'),c={nombre:n,unidad:$('#nmUni').value.trim(),min:$('#nmMin').value.trim(),max:$('#nmMax').value.trim(),mejor:$('#nmMej').value,tipo:$('#nmTipo').value,detalle:'',usos:0};
+  await save('medidas',id,c);pushMed(fromCat(S.medidas[id],''));['nmNom','nmUni','nmMin','nmMax'].forEach(x=>$('#'+x).value='');toast('Medida creada en el catálogo')},
+ editMed:d=>{const m=d.id?S.medidas[d.id]:{mejor:'alto',tipo:'numero'};
+  openSheet(d.id?'Editar medida':'Nueva medida',`<form class="stack" id="fM" data-id="${d.id||''}">
+   <div><label for="eNom">Nombre</label><input id="eNom" value="${esc(m.nombre)}"></div>
+   <div class="grid2"><div><label for="eUni">Unidad</label><input id="eUni" value="${esc(m.unidad)}"></div><div><label for="eTipo">Forma de registrar</label><select id="eTipo">${[['numero','Número'],['eva','Escala 0–10'],['daniels','Escala 0–5']].map(([k,v])=>`<option value="${k}" ${m.tipo===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
+   <div class="grid2"><div><label for="eMin">Mínimo</label><input id="eMin" inputmode="decimal" value="${esc(m.min)}"></div><div><label for="eMax">Máximo</label><input id="eMax" inputmode="decimal" value="${esc(m.max)}"></div></div>
+   <div><label for="eMej">¿Cuándo es mejoría?</label><select id="eMej"><option value="alto">Si el número sube</option><option value="bajo" ${m.mejor==='bajo'?'selected':''}>Si el número baja</option></select></div>
+   <div class="grid2"><div><label for="eDet">Pedir detalle al agregarla (opcional)</label><input id="eDet" value="${esc(m.detalle)}" placeholder="Ej: Articulación y movimiento"></div><div><label for="eEj">Ejemplo de detalle</label><input id="eEj" value="${esc(m.ejemplo)}" placeholder="Ej: Flexión rodilla der."></div></div>
+   <div class="row"><button class="primary" data-act="guardarMed">Guardar</button>${d.id?`<button type="button" class="ghost danger" data-act="borrarMed" data-id="${d.id}">Eliminar del catálogo</button>`:''}</div></form>`)},
+ async guardarMed(){const f=$('#fM');const id=f.dataset.id||uid('k');const n=$('#eNom').value.trim();if(!n){toast('Escribe el nombre');return}
+  await save('medidas',id,Object.assign({},S.medidas[id]||{usos:0},{nombre:n,unidad:$('#eUni').value.trim(),tipo:$('#eTipo').value,min:$('#eMin').value.trim(),max:$('#eMax').value.trim(),mejor:$('#eMej').value,detalle:$('#eDet').value.trim(),ejemplo:$('#eEj').value.trim()}));
+  toast('Medida guardada');closeSheet()},
+ async borrarMed(d){await remove('medidas',d.id);closeSheet()}
+});
+async function contarUsos(ids){for(const id of ids){const q=S.preguntas[id];if(q)await patch('preguntas',id,{usos:(q.usos||0)+1})}}
+document.addEventListener('submit',e=>e.preventDefault());
+
+// ===== Envío sin Claude: hoja de compartir del celular =====
+async function compartirArchivo(b64,filename,mime,texto){
+  const blob=new Blob([Uint8Array.from(atob(b64),c=>c.charCodeAt(0))],{type:mime});
+  try{const file=new File([blob],filename,{type:mime});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:filename,text:texto||''});return}}
+  catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);
+  toast('Archivo descargado. Adjúntalo en WhatsApp o en el correo.',3800);
+}
+async function enviarCorreo({subject,body,attach}){
+  if(attach)return compartirArchivo(attach.content,attach.filename,attach.mimeType,subject);
+  if(navigator.share){try{await navigator.share({title:subject,text:body||''})}catch(e){}}
+}
+async function enviarExcelSesion(s){await patch('sesiones',s.id,{excelEnviado:null})}
+async function enviarPDF(p,kind){
+  try{const b64=pdfB64(p,kind);const pr=pro(proDe(p));
+    await compartirArchivo(b64,pdfNombre(p,kind),'application/pdf',`Hola ${p.nombre.split(' ')[0]}, te comparto ${kind==='valoracion'?'tu valoración fisioterapéutica':'tu informe de avances'}. ${pr.nombre}, ${pr.titulo}.`);
+    await patch('pacientes',p.id,{[kind==='valoracion'?'valPdfEnviado':'infPdfEnviado']:today()});
+  }catch(e){toast('No se pudo crear el PDF. Revisa tu conexión a internet e inténtalo de nuevo.',4000)}
+}
+ACT.backup=()=>{const json=JSON.stringify(window.__fisio.get());compartirArchivo(btoa(unescape(encodeURIComponent(json))),`Copia_Fisioterapia_${today()}.json`,'application/json','Copia de seguridad FISIOTERAPIA')};
+document.addEventListener('change',e=>{if(e.target.id!=='restore'||!e.target.files[0])return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d||!d.config)throw 0;window.__fisio.set(d);toast('Copia restaurada')}catch(x){toast('Ese archivo no es una copia válida de FISIOTERAPIA')}};r.readAsText(e.target.files[0])});
+
+boot();
+</script>
+</body></html>
